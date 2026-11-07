@@ -1,5 +1,8 @@
 <?php
 declare(strict_types=1);
-require __DIR__ . '/../../includes/auth.php';
+require __DIR__ . '/../../includes/layout.php';
 $user = require_capability('admin');
-echo 'Admin dashboard for ' . e($user['full_name']);
+layout_start($user, 'Dashboard');
+?>
+<p>Welcome, <?= e($user['full_name']) ?>.</p>
+<?php layout_end();
