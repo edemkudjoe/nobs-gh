@@ -1,0 +1,26 @@
+services:
+  app:
+    build: .
+    ports:
+      - "8080:80"
+    env_file: .env
+    volumes:
+      - ./public:/app/public
+      - ./includes:/app/includes
+    depends_on:
+      - db
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: nobb
+      POSTGRES_PASSWORD: nobb
+      POSTGRES_DB: nobb
+    ports:
+      - "5432:5432"
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+      - ./sql:/docker-entrypoint-initdb.d   # runs schema.sql then seed.sql on first start
+
+volumes:
+  dbdata:
