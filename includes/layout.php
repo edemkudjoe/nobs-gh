@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__ . '/auth.php';
+require_once __DIR__ . '/autocheck.php';
 
 /**
  * The menu for each role: [section => [[label, url, right-needed], ...]].
@@ -47,6 +48,7 @@ function nav_items(array $user): array
 /** Print the top of every signed-in page. Pair it with layout_end(). */
 function layout_start(array $user, string $title): void
 {
+        autocheck();   // overdue offers, expired blood and organs, missed bookings
     $here  = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH);
     $who   = match ($user['role']) {
         'admin'  => 'Admin, head office',
