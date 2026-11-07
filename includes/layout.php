@@ -45,6 +45,24 @@ function nav_items(array $user): array
     return $nav;
 }
 
+/** Remember a one-time message for the next page the user sees (after a form is saved). */
+function flash_set(string $message, string $type = 'ok'): void
+{
+    start_session();
+    $_SESSION['flash'] = [$type, $message];
+}
+
+/** Print and clear the one-time message, if there is one. */
+function flash_show(): void
+{
+    start_session();
+    if (!empty($_SESSION['flash'])) {
+        [$type, $message] = $_SESSION['flash'];
+        unset($_SESSION['flash']);
+        echo '<p class="' . ($type === 'error' ? 'alert' : 'notice') . '" role="status">' . e($message) . '</p>';
+    }
+}
+
 /** Print the top of every signed-in page. Pair it with layout_end(). */
 function layout_start(array $user, string $title): void
 {
@@ -87,6 +105,7 @@ function layout_start(array $user, string $title): void
     <main class="main">
       <h1><?= e($title) ?></h1>
 <?php
+    flash_show();
 }
 
 /** Print the bottom of every signed-in page. */
