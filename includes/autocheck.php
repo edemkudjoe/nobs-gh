@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__ . '/settings.php';
+require_once __DIR__ . '/organ.php';
 
 /**
  * The "automatic check". There is no background job on Vercel, so it runs when a
@@ -52,12 +53,13 @@ function autocheck_run(): void
         autocheck_log('auto_expire_units', 'blood_unit', "$n unit(s) expired");
     }
 
-    // 3. Organ offers nobody answered in time: the organ goes back to be offered to the next patient.
+    // 3.the organ moves on to the next ranked patient.
     $late = db_all("UPDATE organ_offers SET response = 'timed_out'
                      WHERE response = 'pending' AND respond_by < now()
                  RETURNING organ_id");
-    foreach ($late as $o) {
+        foreach ($late as $o) {
         db_exec("UPDATE organs SET status = 'available' WHERE id = ? AND status = 'offered'", [$o['organ_id']]);
+        organ_advance((int)$o['organ_id']);   // on to the next ranked patient, if the organ is still viable
     }
     if ($late) {
         autocheck_log('auto_organ_timeout', 'organ_offer', count($late) . ' organ offer(s) timed out');
