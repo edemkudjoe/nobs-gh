@@ -45,6 +45,14 @@ function nav_items(array $user): array
     return $nav;
 }
 
+/** Print the error under a form field, if that field has one. */
+function field_error(array $errors, string $key): void
+{
+    if (isset($errors[$key])) {
+        echo '<div class="alert">' . e($errors[$key]) . '</div>';
+    }
+}
+
 /** Remember a one-time message for the next page the user sees (after a form is saved). */
 function flash_set(string $message, string $type = 'ok'): void
 {
@@ -115,6 +123,41 @@ function layout_end(): void
       <p class="fine">Student project prototype with sample data. Not an official NBS, MoH or GHS system.</p>
     </main>
   </div>
+</body>
+</html>
+<?php
+}
+
+/** Top of a page for people who are not signed in (login, register). Pair it with guest_end(). */
+function guest_start(string $title): void
+{
+    ?>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><?= e($title) ?> | National Organ &amp; Blood Bank</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/app.css">
+</head>
+<body>
+  <div class="flag"><i></i><i></i><i></i></div>
+  <header class="top">
+    <div class="brand">National Organ &amp; Blood Bank System</div>
+    <div class="who"><a href="/login.php">Sign in</a> · <a href="/register.php">Register as a donor</a></div>
+  </header>
+  <main class="guest">
+    <h1><?= e($title) ?></h1>
+<?php
+}
+
+function guest_end(): void
+{
+    ?>
+    <p class="fine">Student project prototype with sample data. Not an official NBS, MoH or GHS system.</p>
+  </main>
 </body>
 </html>
 <?php
