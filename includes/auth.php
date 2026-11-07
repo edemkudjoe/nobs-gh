@@ -144,3 +144,41 @@ function csrf_check(): void
         exit('The form expired. Go back, refresh the page and try again.');
     }
 }
+
+/** More than 4 wrong passwords for one email in 15 minutes locks that email for the rest of the window. */
+function login_blocked(string $email): bool
+{
+    return (int)db_val(
+        "SELECT COUNT(*) FROM audit_log
+          WHERE action = 'login_failed' AND detail = ? AND created_at > now() - INTERVAL '15 minutes'",
+        [mb_strtolower(trim($email))]
+    ) >= 5;
+}
+
+function login_record_failure(string $email): void
+{
+    db_exec("INSERT INTO audit_log (action, entity, detail) VALUES ('login_failed', 'user', ?)",
+            [substr(mb_strtolower(trim($email)), 0, 160)]);
+}
+
+/** The password rule in one place. Returns the problem as a sentence, or null if the password is fine. */
+function password_problem(string $password): ?string
+{
+    if (strlen($password) < 8 || !preg_match('/[A-Za-z]/', $password) || !preg_match('/\d/', $password)) {
+        return 'The password must be at least 8 characters and include a letter and a number.';
+    }
+    return null;
+}
+
+/** A random one-time password for new or reset accounts (no look-alike characters). */
+function temp_password(): string
+{
+    $chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789';
+    do {
+        $pw = '';
+        for ($i = 0; $i < 10; $i++) {
+            $pw .= $chars[random_int(0, strlen($chars) - 1)];
+        }
+    } while (password_problem($pw) !== null);
+    return $pw;
+}
