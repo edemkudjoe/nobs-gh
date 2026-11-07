@@ -1,0 +1,66 @@
+:root {
+  --ink: #14212B; --muted: #4A5B68; --line: #D8E1E8; --panel: #F4F7F9;
+  --green: #185C35; --blue: #0B6A97; --red: #A30F16; --gold: #ECCB22;
+}
+* { box-sizing: border-box; }
+body { margin: 0; color: var(--ink); background: #fff; font-family: "Atkinson Hyperlegible", system-ui, sans-serif; font-size: 16px; line-height: 1.5; }
+a { color: var(--blue); }
+a:hover { color: #08506F; }
+a:focus-visible, button:focus-visible, input:focus, select:focus, textarea:focus { outline: 3px solid var(--blue); outline-offset: 2px; }
+
+/* top bar */
+.flag { display: flex; height: 4px; }
+.flag i { flex: 1; }
+.flag i:nth-child(1) { background: var(--green); } .flag i:nth-child(2) { background: var(--gold); } .flag i:nth-child(3) { background: #F41D22; }
+.top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 24px; border-bottom: 1px solid var(--line); }
+.brand { font-size: 17px; font-weight: 700; }
+.who { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; font-size: 14px; color: var(--muted); }
+
+/* sidebar + page */
+.shell { display: flex; flex-wrap: wrap; min-height: calc(100vh - 60px); }
+.side { width: 232px; max-width: 100%; padding: 20px 12px; background: var(--panel); border-right: 1px solid var(--line); }
+.side-title { padding: 14px 12px 6px; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.side-title:first-child { padding-top: 0; }
+.side a { display: flex; align-items: center; min-height: 44px; padding: 0 12px; font-size: 14px; color: var(--ink); text-decoration: none; border-left: 4px solid transparent; }
+.side a:hover { background: #fff; }
+.side a.on { color: var(--green); font-weight: 700; background: #fff; border-left-color: var(--gold); }
+.main { flex: 1 1 480px; min-width: 0; padding: 28px 32px; }
+.main h1 { margin: 0 0 16px; font-size: 28px; }
+.main h2 { margin: 24px 0 8px; font-size: 18px; }
+.fine { margin-top: 40px; font-size: 12px; color: var(--muted); }
+
+/* buttons */
+.btn { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 20px; border-radius: 4px; font: inherit; font-size: 15px; font-weight: 700; cursor: pointer; text-decoration: none; border: 0; background: var(--green); color: #fff; }
+.btn:hover { background: #124a2a; color: #fff; }
+.btn-quiet { background: #fff; color: var(--green); border: 2px solid var(--green); min-height: 36px; padding: 0 14px; font-size: 14px; }
+.btn-quiet:hover { background: var(--panel); color: var(--green); }
+.btn-danger { background: #fff; color: var(--red); border: 2px solid var(--red); }
+.btn-danger:hover { background: #fdf1f1; color: var(--red); }
+
+/* forms */
+.field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; max-width: 420px; }
+.field label { font-size: 15px; font-weight: 700; }
+.field .hint { font-size: 13px; color: var(--muted); }
+input[type=text], input[type=email], input[type=password], input[type=number], input[type=date], select, textarea {
+  height: 44px; padding: 0 12px; font: inherit; font-size: 16px; background: #fff; border: 1px solid #6B7C88; border-radius: 4px; width: 100%; }
+textarea { height: auto; padding: 10px 12px; }
+.alert { padding: 10px 14px; margin: 0 0 16px; max-width: 420px; border: 1px solid var(--red); border-left-width: 6px; border-radius: 4px; color: var(--red); font-weight: 700; }
+.notice { padding: 10px 14px; margin: 0 0 16px; max-width: 420px; border: 1px solid var(--green); border-left-width: 6px; border-radius: 4px; }
+
+/* tables and tiles */
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { text-align: left; padding: 8px 12px 8px 0; border-bottom: 2px solid var(--ink); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+td { padding: 11px 12px 11px 0; border-bottom: 1px solid var(--line); }
+.tiles { display: flex; flex-wrap: wrap; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); margin: 16px 0; }
+.tile { flex: 1 1 200px; padding: 16px 20px; }
+.tile + .tile { border-left: 1px solid var(--line); }
+.tile .label { font-size: 13px; color: var(--muted); }
+.tile .value { font-size: 32px; font-weight: 700; line-height: 1.15; }
+.code { font-family: "IBM Plex Mono", monospace; font-weight: 500; font-size: 13px; }
+
+/* small screens */
+@media (max-width: 720px) {
+  .side { width: 100%; border-right: 0; border-bottom: 1px solid var(--line); }
+  .main { padding: 20px 16px; }
+  .top { padding: 10px 16px; }
+}
