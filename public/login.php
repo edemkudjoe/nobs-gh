@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-require __DIR__ . '/../includes/auth.php';
+require __DIR__ . '/../includes/layout.php';
 
 $error = '';
 if (current_user() && $_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -8,27 +8,35 @@ if (current_user() && $_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check();
-    $user = attempt_login((string)($_POST['email'] ?? ''), (string)($_POST['password'] ?? ''));
-    if ($user === null) {
-        $error = 'Email or password is not correct.';
-    } elseif ($user['must_change_password']) {
-        redirect('/set-password.php');
+    $email = (string)($_POST['email'] ?? '');
+    if (login_blocked($email)) {
+        $error = 'Too many wrong attempts. Wait 15 minutes and try again.';
     } else {
-        redirect(home_for($user['role']));
+        $user = attempt_login($email, (string)($_POST['password'] ?? ''));
+        if ($user === null) {
+            login_record_failure($email);
+            $error = 'Email or password is not correct.';
+        } elseif ($user['must_change_password']) {
+            redirect('/set-password.php');
+        } else {
+            redirect(home_for($user['role']));
+        }
     }
 }
+guest_start('Sign in');
 ?>
-<!doctype html>
-<html lang="en">
-<head><meta charset="utf-8"><title>Sign in</title><meta name="viewport" content="width=device-width, initial-scale=1"></head>
-<body>
-  <h1>Sign in</h1>
-  <?php if ($error): ?><p role="alert"><?= e($error) ?></p><?php endif; ?>
-  <form method="post">
-    <?= csrf_field() ?>
-    <label>Email address <input type="email" name="email" required autocomplete="username"></label><br>
-    <label>Password <input type="password" name="password" required autocomplete="current-password"></label><br>
-    <button type="submit">Sign in</button>
-  </form>
-</body>
-</html>
+<?php if ($error): ?><p class="alert" role="alert"><?= e($error) ?></p><?php endif; ?>
+<form method="post">
+  <?= csrf_field() ?>
+  <div class="field">
+    <label for="email">Email address</label>
+    <input id="email" name="email" type="email" required autocomplete="username" value="<?= e($_POST['email'] ?? '') ?>">
+  </div>
+  <div class="field">
+    <label for="password">Password</label>
+    <input id="password" name="password" type="password" required autocomplete="current-password">
+  </div>
+  <button class="btn" type="submit">Sign in</button>
+</form>
+<p>New donor? <a href="/register.php">Create an account</a></p>
+<?php guest_end();
