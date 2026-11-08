@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-require __DIR__ . '/../includes/auth.php';
+require_once __DIR__ . '/../includes/auth.php';
 
 $user = require_login(true);   // true = this page is allowed while a password change is pending
 $error = '';
