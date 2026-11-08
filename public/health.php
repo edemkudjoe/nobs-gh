@@ -1,7 +1,7 @@
 <?php
 // Connection test. Delete this file (or require an admin login) before the demo.
 declare(strict_types=1);
-require __DIR__ . '/../includes/session.php';
+require_once __DIR__ . '/../includes/session.php';
 
 start_session();
 $_SESSION['visits'] = ($_SESSION['visits'] ?? 0) + 1;
