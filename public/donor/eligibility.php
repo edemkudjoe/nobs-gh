@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
-require __DIR__ . '/../../includes/layout.php';
-require __DIR__ . '/../../includes/donation.php';
+require_once __DIR__ . '/../../includes/layout.php';
+require_once __DIR__ . '/../../includes/donation.php';
 $user  = require_capability('donor');
 $check = donor_check((int)$user['id']);
 
