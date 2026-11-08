@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-require __DIR__ . '/../../includes/layout.php';
+require_once __DIR__ . '/../../includes/layout.php';
 $user = require_capability('admin');
 
 $regions = db_all('SELECT id, name FROM regions ORDER BY name');
