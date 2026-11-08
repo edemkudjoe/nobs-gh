@@ -128,9 +128,11 @@ function layout_end(): void
 <?php
 }
 
-/** Top of a page for people who are not signed in (login, register). Pair it with guest_end(). */
-function guest_start(string $title): void
+
+/** Top of the public information pages (home, how it works, features, about). Pair it with public_end(). */
+function public_start(string $title, string $current = ''): void
 {
+    $links = ['/' => 'Home', '/how-it-works.php' => 'How it works', '/features.php' => 'Features', '/about.php' => 'About'];
     ?>
 <!doctype html>
 <html lang="en">
@@ -146,14 +148,18 @@ function guest_start(string $title): void
   <div class="flag"><i></i><i></i><i></i></div>
   <header class="top">
     <div class="brand">National Organ &amp; Blood Bank System</div>
-    <div class="who"><a href="/login.php">Sign in</a> · <a href="/register.php">Register as a donor</a></div>
+    <nav class="who" aria-label="Main">
+      <?php foreach ($links as $url => $label): ?>
+        <a href="<?= e($url) ?>"<?= $url === $current ? ' aria-current="page"' : '' ?>><?= e($label) ?></a> ·
+      <?php endforeach; ?>
+      <a href="/login.php">Sign in</a> · <a href="/register.php">Register as a donor</a>
+    </nav>
   </header>
-  <main class="guest">
-    <h1><?= e($title) ?></h1>
+  <main class="page">
 <?php
 }
 
-function guest_end(): void
+function public_end(): void
 {
     ?>
     <p class="fine">Student project prototype with sample data. Not an official NBS, MoH or GHS system.</p>
