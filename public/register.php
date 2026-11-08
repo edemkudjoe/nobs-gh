@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-require __DIR__ . '/../includes/layout.php';
+require_once __DIR__ . '/../includes/layout.php';
 
 if (current_user()) {
     redirect(home_for(current_user()['role']));
