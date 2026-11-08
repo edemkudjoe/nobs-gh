@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-require __DIR__ . '/../includes/layout.php';
+require_once __DIR__ . '/../includes/layout.php';
 
 $error = '';
 if (current_user() && $_SERVER['REQUEST_METHOD'] !== 'POST') {
