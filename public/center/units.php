@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-require __DIR__ . '/../../includes/layout.php';
+require_once __DIR__ . '/../../includes/layout.php';
 $user = require_capability('center');
 
 // Lab result for a unit that is waiting in testing. Only this centre's own units.
