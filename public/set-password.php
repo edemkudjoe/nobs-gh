@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-require_once __DIR__ . '/../includes/auth.php';
+require_once __DIR__ . '/../includes/layout.php';
 
 $user = require_login(true);   // true = this page is allowed while a password change is pending
 $error = '';
@@ -26,20 +26,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         redirect(home_for($user['role']));
     }
 }
+guest_start('Set your own password', $user['must_change_password']
+    ? 'Your temporary password was created for you. Choose one that only you know before you continue.'
+    : 'Choose a new password for your account.');
 ?>
-<!doctype html>
-<html lang="en">
-<head><meta charset="utf-8"><title>Set your password</title><meta name="viewport" content="width=device-width, initial-scale=1"></head>
-<body>
-  <h1>Set your password</h1>
-  <?php if ($user['must_change_password']): ?><p>You must choose a new password before continuing.</p><?php endif; ?>
-  <?php if ($error): ?><p role="alert"><?= e($error) ?></p><?php endif; ?>
-  <form method="post">
-    <?= csrf_field() ?>
-    <label>Current password <input type="password" name="current_password" required autocomplete="current-password"></label><br>
-    <label>New password <input type="password" name="new_password" required minlength="8" autocomplete="new-password"></label><br>
-    <label>Confirm new password <input type="password" name="confirm_password" required minlength="8" autocomplete="new-password"></label><br>
-    <button type="submit">Save password</button>
-  </form>
-</body>
-</html>
+<?php if ($error): ?><p class="alert" role="alert"><?= e($error) ?></p><?php endif; ?>
+<form method="post" style="max-width:480px">
+  <?= csrf_field() ?>
+  <div class="field"><label for="current_password">Temporary or current password</label>
+    <input id="current_password" name="current_password" type="password" required autocomplete="current-password"></div>
+  <div class="field"><label for="new_password">New password</label>
+    <span class="hint">At least 8 characters, with a letter and a number.</span>
+    <input id="new_password" name="new_password" type="password" required minlength="8" autocomplete="new-password"></div>
+  <div class="field"><label for="confirm_password">Repeat new password</label>
+    <input id="confirm_password" name="confirm_password" type="password" required minlength="8" autocomplete="new-password"></div>
+  <div class="form-actions"><button class="btn" type="submit">Save and continue</button></div>
+</form>
+<?php guest_end();
