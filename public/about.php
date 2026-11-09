@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__ . '/../includes/layout.php';
+require_once __DIR__ . '/../includes/art.php';
 public_start('About', '/about.php');
 ?>
 <section class="sec hero">
@@ -17,7 +18,7 @@ public_start('About', '/about.php');
     </div>
     <div class="r">
       <div class="eyebrow">A shared starting point</div>
-      <h1 style="font-size:46px">Coordination starts with the people doing the work.</h1>
+      <h1 class="h52">Coordination starts with the people doing the work.</h1>
       <p class="body">Center staff keep stock and record tests. Hospital staff record needs. The national administrator reviews them and coordinates between facilities. Each decision needs clear information and a visible next step.</p>
       <p class="body">This system brings that work into one place, connecting donors, stock, requests and the records that explain what happened.</p>
       <p class="body">A student project for Full-Stack Web Development at UPSA, built by a team of six. It uses sample data and is not an official NBS, MoH or GHS system.</p>
@@ -25,18 +26,21 @@ public_start('About', '/about.php');
   </div>
 </section>
 
-<section class="sec grey">
-  <div class="wrap">
-    <div class="eyebrow">Who it is built for</div>
-    <h2 class="big">Four kinds of people, one record.</h2>
-    <p class="txt" style="max-width:640px">Donors, center staff, hospital staff and the national administrator each see only what their work needs, and each action leaves a trace.</p>
+<section class="sec" style="padding-top:24px">
+  <div class="wrap split" style="align-items:center">
+    <div class="l"><div class="art" role="img" aria-label="Illustration of the people who use the system"><?= art_people() ?></div></div>
+    <div class="r">
+      <div class="eyebrow">Who it is built for</div>
+      <h2 class="big">Four kinds of people, one record.</h2>
+      <p class="txt" style="max-width:520px">Donors, center staff, hospital staff and the national administrator each see only what their work needs, and each action leaves a trace.</p>
+    </div>
   </div>
 </section>
 
-<section class="sec">
+<section class="sec grey">
   <div class="wrap">
     <div class="eyebrow">Design principles</div>
-    <h2 class="big">What we put first.</h2>
+    <h2 class="big xl2">What we put first.</h2>
     <div class="principles">
       <div><div class="n">01</div><h3>Safety</h3><p>Blood is tested before it is used, and patients are verified before they are matched.</p></div>
       <div><div class="n">02</div><h3>Accountability</h3><p>Overrides need a reason, and every sensitive action is logged.</p></div>
@@ -46,9 +50,9 @@ public_start('About', '/about.php');
   </div>
 </section>
 
-<section class="sec grey">
+<section class="sec pad-cta">
   <div class="wrap center">
-    <h2 class="big">See the shared workflow in action.</h2>
+    <h2 class="big xl2">See the shared workflow in action.</h2>
     <div class="cta-row"><a class="btn btn-lg" href="/how-it-works.php">How it works <?= icon('arrow', 18) ?></a></div>
   </div>
 </section>
