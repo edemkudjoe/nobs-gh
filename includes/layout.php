@@ -199,8 +199,7 @@ function site_footer(): void
         <div><h2>Access</h2><a href="/login.php">Sign in</a><a href="/register.php">Register as a donor</a></div>
       </div>
       <div class="foot-base">
-        <span>Student project prototype with sample data. Not an official NBS, MoH or GHS system. Logos belong to their owners.</span>
-        <span>Blood and organ donation coordination</span>
+        <span>&copy; 2026, Developed and powered by Group 2, IT8</span>
       </div>
     </div>
   </footer>
