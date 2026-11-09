@@ -120,7 +120,7 @@ function layout_start(array $user, string $title): void
 function layout_end(): void
 {
     ?>
-      <p class="fine">Student project prototype with sample data. Not an official NBS, MoH or GHS system.</p>
+      <p class="fine">&copy; 2026, Developed by Group 2, IT8</p>
     </main>
   </div>
 </body>
