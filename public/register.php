@@ -46,6 +46,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($f['phone'] !== '' && !preg_match('/^[0-9+ ]{7,20}$/', $f['phone'])) {
         $errors['phone'] = 'Use only digits, spaces and +.';
     }
+    if (empty($_POST['agree'])) {
+        $errors['agree'] = 'Tick the box to agree before creating your account.';
+    }
     if ($problem = password_problem($password)) {
         $errors['password'] = $problem;
     } elseif ($password !== (string)($_POST['confirm_password'] ?? '')) {
@@ -70,35 +73,54 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-guest_start('Register as a donor');
+guest_start('Create a donor account', 'It takes about two minutes. You can check if you are eligible and book a date once you are signed in.');
 ?>
 <form method="post" novalidate>
   <?= csrf_field() ?>
-  <div class="field"><label for="full_name">Full name</label>
-    <input id="full_name" name="full_name" type="text" maxlength="120" required value="<?= e($f['full_name']) ?>"><?php field_error($errors, 'full_name'); ?></div>
-  <div class="field"><label for="email">Email address</label>
-    <input id="email" name="email" type="email" maxlength="160" required autocomplete="username" value="<?= e($f['email']) ?>"><?php field_error($errors, 'email'); ?></div>
-  <div class="field"><label for="date_of_birth">Date of birth</label>
-    <input id="date_of_birth" name="date_of_birth" type="date" required value="<?= e($f['date_of_birth']) ?>"><?php field_error($errors, 'date_of_birth'); ?></div>
-  <div class="field"><label for="weight_kg">Weight (kg)</label>
-    <input id="weight_kg" name="weight_kg" type="number" step="0.1" min="30" max="250" required value="<?= e($f['weight_kg']) ?>"><?php field_error($errors, 'weight_kg'); ?></div>
-  <div class="field"><label for="region_id">Region</label>
-    <select id="region_id" name="region_id" required><option value="">Choose…</option>
-      <?php foreach ($regions as $r): ?><option value="<?= (int)$r['id'] ?>"<?= (string)$r['id'] === $f['region_id'] ? ' selected' : '' ?>><?= e($r['name']) ?></option><?php endforeach; ?>
-    </select><?php field_error($errors, 'region_id'); ?></div>
-  <div class="field"><label for="blood_group_id">Blood group</label>
-    <span class="hint">If you do not know, leave it. A centre will confirm it at your first donation.</span>
-    <select id="blood_group_id" name="blood_group_id"><option value="">I do not know</option>
-      <?php foreach ($groups as $g): ?><option value="<?= (int)$g['id'] ?>"<?= (string)$g['id'] === $f['blood_group_id'] ? ' selected' : '' ?>><?= e($g['label']) ?></option><?php endforeach; ?>
-    </select><?php field_error($errors, 'blood_group_id'); ?></div>
-  <div class="field"><label for="phone">Phone (optional)</label>
-    <input id="phone" name="phone" type="text" maxlength="20" value="<?= e($f['phone']) ?>"><?php field_error($errors, 'phone'); ?></div>
-  <div class="field"><label for="password">Password</label>
-    <span class="hint">At least 8 characters, with a letter and a number.</span>
-    <input id="password" name="password" type="password" required autocomplete="new-password"><?php field_error($errors, 'password'); ?></div>
-  <div class="field"><label for="confirm_password">Confirm password</label>
-    <input id="confirm_password" name="confirm_password" type="password" required autocomplete="new-password"></div>
-  <button class="btn" type="submit">Create account</button>
+  <div class="frow">
+    <div class="field"><label for="full_name">Full name</label>
+      <input id="full_name" name="full_name" type="text" maxlength="120" required autocomplete="name" value="<?= e($f['full_name']) ?>"><?php field_error($errors, 'full_name'); ?></div>
+    <div class="field"><label for="date_of_birth">Date of birth</label>
+      <span class="hint">You must be <?= setting_int('min_age') ?> to <?= setting_int('max_age') ?> to donate.</span>
+      <input id="date_of_birth" name="date_of_birth" type="date" required autocomplete="bday" value="<?= e($f['date_of_birth']) ?>"><?php field_error($errors, 'date_of_birth'); ?></div>
+  </div>
+  <div class="frow">
+    <div class="field"><label for="email">Email address</label>
+      <input id="email" name="email" type="email" maxlength="160" required autocomplete="username" value="<?= e($f['email']) ?>"><?php field_error($errors, 'email'); ?></div>
+    <div class="field"><label for="phone">Phone number (optional)</label>
+      <span class="hint">Used by the center if your booking changes.</span>
+      <input id="phone" name="phone" type="text" inputmode="tel" maxlength="20" autocomplete="tel" value="<?= e($f['phone']) ?>"><?php field_error($errors, 'phone'); ?></div>
+  </div>
+  <div class="frow">
+    <div class="field"><label for="region_id">Your region</label>
+      <span class="hint">Used to find a center near you.</span>
+      <select id="region_id" name="region_id" required><option value="">Choose…</option>
+        <?php foreach ($regions as $r): ?><option value="<?= (int)$r['id'] ?>"<?= (string)$r['id'] === $f['region_id'] ? ' selected' : '' ?>><?= e($r['name']) ?></option><?php endforeach; ?>
+      </select><?php field_error($errors, 'region_id'); ?></div>
+    <div class="field"><label for="blood_group_id">Blood group</label>
+      <span class="hint">The center confirms it at your first donation.</span>
+      <select id="blood_group_id" name="blood_group_id"><option value="">I do not know</option>
+        <?php foreach ($groups as $g): ?><option value="<?= (int)$g['id'] ?>"<?= (string)$g['id'] === $f['blood_group_id'] ? ' selected' : '' ?>><?= e($g['label']) ?></option><?php endforeach; ?>
+      </select><?php field_error($errors, 'blood_group_id'); ?></div>
+  </div>
+  <div class="frow">
+    <div class="field"><label for="weight_kg">Weight (kg)</label>
+      <span class="hint">Donors must weigh at least <?= setting_int('min_weight_kg') ?> kg.</span>
+      <input id="weight_kg" name="weight_kg" type="number" step="0.1" min="30" max="250" required value="<?= e($f['weight_kg']) ?>"><?php field_error($errors, 'weight_kg'); ?></div>
+    <div class="field" aria-hidden="true"></div>
+  </div>
+  <div class="frow">
+    <div class="field"><label for="password">Password</label>
+      <span class="hint">At least 8 characters, with a letter and a number.</span>
+      <input id="password" name="password" type="password" required autocomplete="new-password"><?php field_error($errors, 'password'); ?></div>
+    <div class="field"><label for="confirm_password">Repeat password</label>
+      <input id="confirm_password" name="confirm_password" type="password" required autocomplete="new-password"></div>
+  </div>
+  <label class="check"><input type="checkbox" name="agree" value="1" required<?= !empty($_POST['agree']) ? ' checked' : '' ?>><span>I agree that the system keeps my donation history and the result of my eligibility check.</span></label>
+  <?php field_error($errors, 'agree'); ?>
+  <div class="form-actions">
+    <button class="btn" type="submit">Create account</button>
+    <a href="/login.php">Already registered? Sign in</a>
+  </div>
 </form>
-<p>Already registered? <a href="/login.php">Sign in</a></p>
 <?php guest_end();
