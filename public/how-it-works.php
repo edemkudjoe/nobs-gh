@@ -3,7 +3,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/../includes/layout.php';
 public_start('How it works', '/how-it-works.php');
 ?>
-<section class="sec hero">
+<section class="sec hero short">
   <div class="wrap">
     <div class="eyebrow">How it works</div>
     <h1>Two journeys, one record.</h1>
@@ -52,7 +52,7 @@ public_start('How it works', '/how-it-works.php');
   </div>
 </section>
 
-<section class="sec grey">
+<section class="sec">
   <div class="wrap center">
     <div class="eyebrow">Get started</div>
     <h2 class="big">Start with a donation, or sign in to your facility.</h2>
