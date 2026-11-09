@@ -27,7 +27,7 @@ $groups = [
     ]],
 ];
 ?>
-<section class="sec hero">
+<section class="sec hero short">
   <div class="wrap">
     <div class="eyebrow">Features</div>
     <h1>The details behind better coordination.</h1>
