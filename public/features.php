@@ -2,45 +2,62 @@
 declare(strict_types=1);
 require_once __DIR__ . '/../includes/layout.php';
 public_start('Features', '/features.php');
+
+/** Each group: [eyebrow, heading, [[icon, title, text], ...]] */
+$groups = [
+    ['For donors', 'Book a day without the phone calls.', [
+        ['shield',   'Quick eligibility check', 'A few questions on age, weight and your last donation. Only the result and the date are kept.'],
+        ['calendar', 'Pick a center with free places', 'Choose a date within the booking window. Cancel a booking if your plans change.'],
+        ['history',  'Your donation history', 'See your bookings and the date you can donate again.'],
+    ]],
+    ['For blood centers', 'Keep stock honest.', [
+        ['flask',    'Testing before use', 'Every unit starts in Testing and moves on only with a recorded result.'],
+        ['box',      'Stock and expiry', 'Expiry dates follow the shelf life, with warnings before units expire.'],
+        ['calendar', 'Slots and appointments', 'Set capacity per day and mark each appointment.'],
+    ]],
+    ['For hospitals', 'Ask once, track everything.', [
+        ['clipboard', 'Blood requests', 'Choose group, units and urgency. See offers and answer before the deadline.'],
+        ['people',    'Organ waiting list', 'Register patients with a code. Only verified patients are matched.'],
+        ['drop',      'Report a deceased donor', 'Enter the organs, and the system ranks the waiting patients.'],
+    ]],
+    ['For the national administrator', 'Decide with the facts in view.', [
+        ['list',    'Ranked suggestions', 'Urgency, waiting time, travel time and region are shown, never hidden.'],
+        ['lock',    'Role-based access', 'Each page checks the role and the facility rights on the server.'],
+        ['history', 'Audit log', 'Overrides, verifications and setting changes are recorded with reasons.'],
+    ]],
+];
 ?>
-<h1>Features</h1>
+<section class="sec hero">
+  <div class="wrap">
+    <div class="eyebrow">Features</div>
+    <h1>The details behind better coordination.</h1>
+    <p class="lede">What each kind of user can do, and the checks that keep it safe.</p>
+  </div>
+</section>
 
-<h2>For donors</h2>
-<ul>
-  <li>Self-service eligibility check with clear reasons if you cannot give today.</li>
-  <li>Booking of donation days up to 60 days ahead, with one active booking at a time.</li>
-  <li>History of bookings and your next eligible date.</li>
-</ul>
+<?php foreach ($groups as $i => [$eyebrow, $heading, $cards]): ?>
+<section class="sec<?= $i % 2 === 1 ? ' grey' : '' ?>">
+  <div class="wrap">
+    <div class="eyebrow"><?= e($eyebrow) ?></div>
+    <h2 class="mid"><?= e($heading) ?></h2>
+    <div class="cards3">
+      <?php foreach ($cards as [$ic, $title, $text]): ?>
+        <div><?= icon($ic) ?><h3><?= e($title) ?></h3><p><?= e($text) ?></p></div>
+      <?php endforeach; ?>
+    </div>
+  </div>
+</section>
+<?php endforeach; ?>
 
-<h2>For blood centres</h2>
-<ul>
-  <li>Calendar of donation days with capacity limits.</li>
-  <li>Appointment list to mark donors as completed, deferred or missed.</li>
-  <li>Blood unit register from collection through testing to stock, with expiry tracking.</li>
-</ul>
-
-<h2>For hospitals</h2>
-<ul>
-  <li>Blood requests with urgency levels and a status you can follow.</li>
-  <li>Accept or decline offered units before the deadline.</li>
-  <li>Blood availability by group, nationally and in your region.</li>
-  <li>For approved transplant centres: organ donor reporting, a patient waiting list and organ offers.</li>
-  <li>Staff accounts managed by your own facility administrator.</li>
-</ul>
-
-<h2>For the national administrator</h2>
-<ul>
-  <li>Review and rank blood requests, with suggested units and override reasons.</li>
-  <li>Verify patients on the waiting list and run organ offers with automatic next-in-line.</li>
-  <li>National inventory with minimum stock levels and low-stock warnings.</li>
-  <li>Approve facilities, edit system rules and travel times, and read the audit log.</li>
-</ul>
-
-<h2>Built-in safeguards</h2>
-<ul>
-  <li>Role-based access: every person sees only their own portal.</li>
-  <li>Patients and donors are identified by codes, not names.</li>
-  <li>Temporary passwords, forced password change and login attempt limits.</li>
-  <li>Every request is protected against forged form submissions.</li>
-</ul>
+<section class="sec<?= count($groups) % 2 === 1 ? ' grey' : '' ?>">
+  <div class="wrap center">
+    <div class="eyebrow">Get started</div>
+    <h2 class="big">Start with a donation, or sign in to your facility.</h2>
+    <p class="txt">Donors register in about two minutes. Hospitals and blood centers use the account the national administrator created for them.</p>
+    <div class="cta-row">
+      <a class="btn btn-lg" href="/register.php">Register as a donor <?= icon('arrow', 18) ?></a>
+      <a class="btn-line btn-lg" href="/login.php">Sign in</a>
+    </div>
+  </div>
+</section>
 <?php public_end();
