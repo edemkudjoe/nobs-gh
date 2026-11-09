@@ -129,10 +129,44 @@ function layout_end(): void
 }
 
 
-/** Top of the public information pages (home, how it works, features, about). Pair it with public_end(). */
-function public_start(string $title, string $current = ''): void
+/** Small inline icons used on the public pages. Names: shield calendar bell flask box clipboard people drop list lock history arrow eye. */
+function icon(string $name, int $size = 26): string
 {
-    $links = ['/' => 'Home', '/how-it-works.php' => 'How it works', '/features.php' => 'Features', '/about.php' => 'About'];
+    static $paths = [
+        'shield'    => '<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6l8-3z"/>',
+        'calendar'  => '<rect x="4" y="5" width="16" height="16" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
+        'bell'      => '<path d="M6 16v-5a6 6 0 0 1 12 0v5l2 2H4l2-2zM10 21h4"/>',
+        'flask'     => '<path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3M7.5 15h9"/>',
+        'box'       => '<path d="M12 3l8 4.5v9L12 21l-8-4.5v-9L12 3zM4 7.5l8 4.5 8-4.5M12 12v9"/>',
+        'clipboard' => '<rect x="6" y="4" width="12" height="17" rx="2"/><path d="M9 4h6v3H9zM9 12h6M9 16h4"/>',
+        'people'    => '<circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.5 3-6 6-6s6 2.5 6 6M16 5a3 3 0 0 1 0 6M18 14c2 .8 3 3 3 6"/>',
+        'drop'      => '<path d="M12 3c3 4 6 7 6 11a6 6 0 0 1-12 0c0-4 3-7 6-11z"/>',
+        'list'      => '<path d="M5 6h14M5 12h11M5 18h7"/>',
+        'lock'      => '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+        'history'   => '<path d="M4 12a8 8 0 1 0 3-6.2M4 4v4h4M12 8v4l3 2"/>',
+        'arrow'     => '<path d="M5 12h14M13 6l6 6-6 6"/>',
+        'eye'       => '<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+    ];
+    return '<svg width="' . $size . '" height="' . $size . '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" '
+         . 'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' . ($paths[$name] ?? '') . '</svg>';
+}
+
+/** The three partner logos. Set the environment variable SHOW_LOGOS=0 to hide them (for example until they are approved). */
+function site_logos(): string
+{
+    if (getenv('SHOW_LOGOS') === '0') {
+        return '';
+    }
+    return '<span class="logos">'
+         . '<img src="/assets/img/logo-nbs.png" alt="National Blood Service Ghana logo" width="44" height="44">'
+         . '<img src="/assets/img/logo-moh.png" alt="Ministry of Health, Republic of Ghana seal" width="44" height="44">'
+         . '<img src="/assets/img/logo-ghs.png" alt="Ghana Health Service logo" width="36" height="48">'
+         . '</span><span class="logos-sep" aria-hidden="true"></span>';
+}
+
+/** Everything up to and including the coloured flag stripe. Shared by every page that is not inside a portal. */
+function site_head(string $title): void
+{
     ?>
 <!doctype html>
 <html lang="en">
@@ -144,25 +178,94 @@ function public_start(string $title, string $current = ''): void
   <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/css/app.css">
 </head>
-<body>
+<body class="site">
   <div class="flag"><i></i><i></i><i></i></div>
-  <header class="top">
-    <div class="brand">National Organ &amp; Blood Bank System</div>
-    <nav class="who" aria-label="Main">
+<?php
+}
+
+/** The footer text shared by the public pages. */
+function site_footer(): void
+{
+    ?>
+  <footer class="site-foot">
+    <div class="wrap">
+      <div class="foot-cols">
+        <div class="foot-about">
+          <?php if (getenv('SHOW_LOGOS') !== '0'): ?><span class="logos"><img src="/assets/img/logo-nbs.png" alt="National Blood Service Ghana logo" width="44" height="44"><img src="/assets/img/logo-moh.png" alt="Ministry of Health, Republic of Ghana seal" width="44" height="44"><img src="/assets/img/logo-ghs.png" alt="Ghana Health Service logo" width="36" height="48"></span><?php endif; ?>
+          <p>A clearer connection between donors, blood centers, hospitals and the next request.</p>
+        </div>
+        <div><h2>Product</h2><a href="/how-it-works.php">How it works</a><a href="/features.php">Features</a></div>
+        <div><h2>Company</h2><a href="/about.php">About</a></div>
+        <div><h2>Access</h2><a href="/login.php">Sign in</a><a href="/register.php">Register as a donor</a></div>
+      </div>
+      <div class="foot-base">
+        <span>Student project prototype with sample data. Not an official NBS, MoH or GHS system. Logos belong to their owners.</span>
+        <span>Blood and organ donation coordination</span>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
+<?php
+}
+
+/** Top of the public information pages and the login page. Pair it with public_end(). */
+function public_start(string $title, string $current = ''): void
+{
+    $links = ['/' => 'Home', '/about.php' => 'About', '/how-it-works.php' => 'How it works', '/features.php' => 'Features'];
+    site_head($title);
+    ?>
+  <header class="site-top">
+    <div class="site-id"><?= site_logos() ?><span class="site-name">National Organ &amp; Blood Bank System</span></div>
+    <nav class="site-nav" aria-label="Main">
       <?php foreach ($links as $url => $label): ?>
-        <a href="<?= e($url) ?>"<?= $url === $current ? ' aria-current="page"' : '' ?>><?= e($label) ?></a> ·
+        <a href="<?= e($url) ?>"<?= $url === $current ? ' class="on" aria-current="page"' : '' ?>><?= e($label) ?></a>
       <?php endforeach; ?>
-      <a href="/login.php">Sign in</a> · <a href="/register.php">Register as a donor</a>
+      <a class="btn-line" href="/login.php"<?= $current === '/login.php' ? ' aria-current="page"' : '' ?>>Log in</a>
+      <a class="btn" href="/register.php">Register as a donor</a>
     </nav>
   </header>
-  <main class="page">
+  <main class="site-main">
 <?php
 }
 
 function public_end(): void
 {
     ?>
-    <p class="fine">Student project prototype with sample data. Not an official NBS, MoH or GHS system.</p>
+  </main>
+<?php
+    site_footer();
+}
+
+/**
+ * Top of a simple form page for people who are not signed in (register, set password).
+ * Pair it with guest_end(). The optional intro is the sentence under the heading.
+ */
+function guest_start(string $title, string $intro = ''): void
+{
+    site_head($title);
+    $signedIn = current_user() !== null;
+    ?>
+  <header class="site-top slim">
+    <div class="site-id"><?= site_logos() ?><span class="site-name">National Organ &amp; Blood Bank System</span></div>
+    <?php if ($signedIn): ?>
+      <a class="plain" href="/logout.php">Sign out</a>
+    <?php else: ?>
+      <a class="plain" href="/login.php">Sign in</a>
+    <?php endif; ?>
+  </header>
+  <main class="form-page">
+    <div class="form-wrap">
+      <h1><?= e($title) ?></h1>
+      <?php if ($intro !== ''): ?><p class="intro"><?= e($intro) ?></p><?php endif; ?>
+<?php
+}
+
+function guest_end(): void
+{
+    ?>
+      <p class="fine">Student project prototype with sample data. Not an official NBS, MoH or GHS system. Logos belong to their owners.</p>
+    </div>
   </main>
 </body>
 </html>
