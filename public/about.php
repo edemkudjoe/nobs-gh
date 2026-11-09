@@ -3,23 +3,53 @@ declare(strict_types=1);
 require_once __DIR__ . '/../includes/layout.php';
 public_start('About', '/about.php');
 ?>
-<h1>About this project</h1>
-<p class="lead">The National Organ &amp; Blood Bank System is a student project built for the full-stack web development course at the University of Professional Studies, Accra (UPSA).</p>
+<section class="sec hero">
+  <div class="wrap split">
+    <div class="l">
+      <div class="record" role="group" aria-label="Example record with sample data">
+        <div class="tag eyebrow" style="color:var(--muted)">Example record</div>
+        <div class="t">The records that explain what happened.</div>
+        <div class="row"><span class="tm">08:15</span><span>Donor D-0412 reported by Komfo Anokye Teaching Hospital.</span></div>
+        <div class="row"><span class="tm">08:16</span><span>Kidney O+ ranked. 3 candidates, 2 left out.</span></div>
+        <div class="row"><span class="tm">08:17</span><span>Offered to P-0231 with a 3 hour deadline.</span></div>
+        <div class="row"><span class="tm">11:40</span><span>Override: P-0302 offered, road to rank 1 closed.</span></div>
+      </div>
+    </div>
+    <div class="r">
+      <div class="eyebrow">A shared starting point</div>
+      <h1 style="font-size:46px">Coordination starts with the people doing the work.</h1>
+      <p class="body">Center staff keep stock and record tests. Hospital staff record needs. The national administrator reviews them and coordinates between facilities. Each decision needs clear information and a visible next step.</p>
+      <p class="body">This system brings that work into one place, connecting donors, stock, requests and the records that explain what happened.</p>
+      <p class="body">A student project for Full-Stack Web Development at UPSA, built by a team of six. It uses sample data and is not an official NBS, MoH or GHS system.</p>
+    </div>
+  </div>
+</section>
 
-<h2>What it is</h2>
-<p>A working prototype that shows how blood donation, blood requests and organ matching could run on one shared, rule-based system in Ghana.</p>
+<section class="sec grey">
+  <div class="wrap">
+    <div class="eyebrow">Who it is built for</div>
+    <h2 class="big">Four kinds of people, one record.</h2>
+    <p class="txt" style="max-width:640px">Donors, center staff, hospital staff and the national administrator each see only what their work needs, and each action leaves a trace.</p>
+  </div>
+</section>
 
-<h2>What it is not</h2>
-<ul>
-  <li>It is not an official system of the National Blood Service, the Ministry of Health or the Ghana Health Service.</li>
-  <li>All names, hospitals, patients and stock levels you see are sample data.</li>
-  <li>It must not be used to make real medical decisions.</li>
-</ul>
+<section class="sec">
+  <div class="wrap">
+    <div class="eyebrow">Design principles</div>
+    <h2 class="big">What we put first.</h2>
+    <div class="principles">
+      <div><div class="n">01</div><h3>Safety</h3><p>Blood is tested before it is used, and patients are verified before they are matched.</p></div>
+      <div><div class="n">02</div><h3>Accountability</h3><p>Overrides need a reason, and every sensitive action is logged.</p></div>
+      <div><div class="n">03</div><h3>Fairness</h3><p>Organ ranking uses a fixed order that everyone can see and check.</p></div>
+      <div><div class="n">04</div><h3>Privacy</h3><p>Codes replace names for patients and organ donors, and each person sees only what their work needs.</p></div>
+    </div>
+  </div>
+</section>
 
-<h2>How it is built</h2>
-<p>PHP 8.4 running on FrankenPHP in a Docker container, a PostgreSQL database hosted on Supabase, and plain HTML and CSS with no front-end framework. The matching rules are written in plain PHP and their settings can be changed by the administrator.</p>
-
-<h2>Try it</h2>
-<p>Register as a donor to see the donor portal, or ask the team for demonstration staff accounts.</p>
-<p><a class="btn" href="/register.php">Register as a donor</a></p>
+<section class="sec grey">
+  <div class="wrap center">
+    <h2 class="big">See the shared workflow in action.</h2>
+    <div class="cta-row"><a class="btn btn-lg" href="/how-it-works.php">How it works <?= icon('arrow', 18) ?></a></div>
+  </div>
+</section>
 <?php public_end();
