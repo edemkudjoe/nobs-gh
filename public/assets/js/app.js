@@ -29,6 +29,43 @@
     });
   });
 
+  /* 2. Tables: scroll box, labels for the phone card layout, status badges. */
+  var STATUS = {
+    critical: 'red', rejected: 'red', declined: 'red', expired: 'red', discarded: 'red', missed: 'red', lapsed: 'red',
+    urgent: 'amber', pending: 'amber', testing: 'amber', offered: 'amber', deferred: 'amber', reserved: 'amber',
+    available: 'green', accepted: 'green', fulfilled: 'green', completed: 'green', approved: 'green', active: 'green', allocated: 'green', verified: 'green',
+    routine: 'grey', cancelled: 'grey', scheduled: 'grey', inactive: 'grey', submitted: 'grey'
+  };
+  document.querySelectorAll('.main table').forEach(function (table) {
+    var heads = Array.prototype.map.call(table.querySelectorAll('thead th'), function (th) { return th.textContent.trim(); });
+    table.querySelectorAll('tbody tr').forEach(function (tr) {
+      Array.prototype.forEach.call(tr.children, function (td, i) {
+        if (td.tagName !== 'TD' || td.colSpan > 1) { return; }
+        if (heads[i]) { td.setAttribute('data-label', heads[i]); }
+        var text = td.textContent.trim();
+        var kind = STATUS[text.toLowerCase()];
+        var cell = document.createElement('div');
+        cell.className = 'cell';
+        if (kind && !td.querySelector('form, a, input, button, select')) {
+          var badge = document.createElement('span');
+          badge.className = 'badge badge-' + kind;
+          badge.textContent = text;
+          cell.appendChild(badge);
+          td.textContent = '';
+        } else {
+          while (td.firstChild) { cell.appendChild(td.firstChild); }
+        }
+        td.appendChild(cell);
+      });
+    });
+    if (!table.parentNode.classList.contains('table-wrap')) {
+      var wrap = document.createElement('div');
+      wrap.className = 'table-wrap';
+      table.parentNode.insertBefore(wrap, table);
+      wrap.appendChild(table);
+    }
+  });
+
   /* 2. Menu button for the signed-in pages. */
   var toggle = document.getElementById('navtoggle');
   var nav = document.getElementById('sidenav');
