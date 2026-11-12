@@ -90,19 +90,27 @@ function layout_start(array $user, string $title): void
   <title><?= e($title) ?> | National Organ &amp; Blood Bank</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/app.css">
+    <link rel="stylesheet" href="/assets/css/app.css">
+  <script>document.documentElement.classList.add('js');try{if(localStorage.getItem('navclosed')==='1'){document.documentElement.classList.add('nav-closed');}}catch(e){}</script>
+  <script src="/assets/js/app.js" defer></script>
 </head>
 <body>
   <div class="flag"><i></i><i></i><i></i></div>
   <header class="top">
-    <div class="brand">National Organ &amp; Blood Bank System</div>
+        <div class="top-left">
+      <button type="button" class="nav-toggle" id="navtoggle" aria-controls="sidenav" aria-expanded="true" aria-label="Menu">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+      <a class="brand" href="<?= e(home_for($user['role'])) ?>">National Organ &amp; Blood Bank System</a>
+    </div>
     <div class="who">
       <span><?= e($user['full_name']) ?> · <?= e($who) ?></span>
       <a class="btn btn-quiet" href="/logout.php">Sign out</a>
     </div>
   </header>
   <div class="shell">
-    <nav class="side" aria-label="Main menu">
+        <div class="nav-backdrop" id="navback"></div>
+    <nav class="side" id="sidenav" aria-label="Main menu">
       <?php foreach (nav_items($user) as $section => $items): ?>
         <div class="side-title"><?= e($section) ?></div>
         <?php foreach ($items as [$label, $url]): ?>
@@ -176,7 +184,9 @@ function site_head(string $title): void
   <title><?= e($title) ?> | National Organ &amp; Blood Bank</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/app.css">
+    <link rel="stylesheet" href="/assets/css/app.css">
+  <script>document.documentElement.classList.add('js');try{if(localStorage.getItem('navclosed')==='1'){document.documentElement.classList.add('nav-closed');}}catch(e){}</script>
+  <script src="/assets/js/app.js" defer></script>
 </head>
 <body class="site">
   <div class="flag"><i></i><i></i><i></i></div>
