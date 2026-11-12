@@ -303,3 +303,30 @@ body.site { min-height: 100vh; display: flex; flex-direction: column; }
   .sec.hero2, .sec.pad-who, .sec.pad-work, .sec.pad-cta { padding: 48px 20px; }
   .qrow { flex-wrap: wrap; }
 }
+
+/* menu button, collapsible side menu, password eye on every form */
+.top-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.top-left .brand { color: var(--ink); text-decoration: none; }
+.nav-toggle { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; flex: none; border: 1px solid var(--line); border-radius: 8px; background: #fff; color: var(--ink); cursor: pointer; }
+.nav-toggle:hover { background: var(--panel); }
+.nav-backdrop { display: none; }
+@media (min-width: 721px) {
+  html.nav-closed .side { display: none; }
+}
+@media (max-width: 720px) {
+  .js .side { position: fixed; top: 0; left: 0; bottom: 0; z-index: 30; width: 260px; max-width: 85vw; padding-top: 72px; overflow-y: auto; border-right: 1px solid var(--line); border-bottom: 0; transform: translateX(-100%); visibility: hidden; transition: transform .2s ease, visibility .2s; }
+  .js.nav-open .side { transform: none; visibility: visible; }
+  .js.nav-open .nav-backdrop { display: block; position: fixed; inset: 0; z-index: 20; background: rgba(20, 33, 43, .45); }
+  .top-left .brand { font-size: 15px; }
+}
+.pwbox input { width: 100%; box-sizing: border-box; }
+
+/* donor booking: date picker bar and day chips */
+.pickbar { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px 16px; margin: 0 0 16px; }
+.pickbar .field { margin: 0; flex: 1 1 200px; max-width: 260px; }
+.pickbar .err { font-size: 14px; color: var(--red); font-weight: 700; }
+.pickbtns { display: flex; flex-wrap: wrap; gap: 8px; }
+.daychips { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 16px; }
+.chip { display: inline-flex; align-items: center; min-height: 36px; padding: 0 12px; border: 1px solid var(--line); border-radius: 999px; background: #fff; color: var(--ink); text-decoration: none; font-size: 14px; }
+.chip:hover { border-color: var(--green); color: var(--green); }
+.table-wrap { overflow-x: auto; }
