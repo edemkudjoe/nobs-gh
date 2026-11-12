@@ -82,12 +82,17 @@ layout_start($user, 'Blood requests');
       <td><?= $need ?> × <span class="code"><?= e($r['label']) ?></span><?= $r['accept_compatible'] ? '<br>or compatible' : '' ?></td>
       <td><strong><?= e(ucfirst($r['urgency'])) ?></strong></td>
       <td><?= e(substr($r['created_at'], 0, 16)) ?></td>
-      <td>
+            <td>
         <?php if (!$units): ?>
           None available
-        <?php else: foreach ($units as $u): ?>
-          <span class="code">BU-<?= (int)$u['id'] ?></span> <?= e($u['label']) ?>, <?= (int)$u['days_left'] ?> days left, <?= e($u['facility']) ?><br>
-        <?php endforeach; if (count($units) < $need): ?>Only <?= count($units) ?> of <?= $need ?> available<?php endif; endif; ?>
+        <?php else: ?>
+          <ul class="unitlist">
+          <?php foreach ($units as $u): ?>
+            <li><span class="code">BU-<?= (int)$u['id'] ?></span> <?= e($u['label']) ?> · <?= (int)$u['days_left'] ?> days left<br><span class="sub"><?= e($u['facility']) ?></span></li>
+          <?php endforeach; ?>
+          </ul>
+          <?php if (count($units) < $need): ?><span class="sub">Only <?= count($units) ?> of <?= $need ?> available</span><?php endif; ?>
+        <?php endif; ?>
       </td>
       <td>
         <?php if ($units): ?>
