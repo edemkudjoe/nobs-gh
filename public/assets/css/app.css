@@ -330,3 +330,33 @@ body.site { min-height: 100vh; display: flex; flex-direction: column; }
 .chip { display: inline-flex; align-items: center; min-height: 36px; padding: 0 12px; border: 1px solid var(--line); border-radius: 999px; background: #fff; color: var(--ink); text-decoration: none; font-size: 14px; }
 .chip:hover { border-color: var(--green); color: var(--green); }
 .table-wrap { overflow-x: auto; }
+
+/* tables: cleaner look, scroll box, status badges, phone cards */
+.table-wrap { overflow-x: auto; max-width: 100%; margin: 8px 0 16px; }
+.main table { background: #fff; border: 1px solid var(--line); border-radius: 8px; border-collapse: separate; border-spacing: 0; overflow: hidden; }
+.main th { background: var(--panel); padding: 10px 14px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.main td { padding: 12px 14px; vertical-align: top; }
+.main tbody tr:last-child td { border-bottom: 0; }
+.main tbody tr:hover td { background: #F9FBFC; }
+.main td .cell > .btn, .main td .cell form { margin: 0; }
+.sub { font-size: 13px; color: var(--muted); }
+.unitlist { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+.badge { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 13px; font-weight: 700; border: 1px solid transparent; }
+.badge-red   { color: var(--red);   background: #FBEAEB; border-color: #E9B8BB; }
+.badge-amber { color: #6B4E00;      background: #FFF6CC; border-color: #E3CE6A; }
+.badge-green { color: var(--green); background: #E6F2EA; border-color: #A9CDB6; }
+.badge-grey  { color: #44525C;      background: #EEF1F3; border-color: #CBD3D9; }
+@media (max-width: 720px) {
+  .table-wrap { overflow: visible; }
+  .main table, .main tbody, .main tr, .main td { display: block; width: 100%; }
+  .main table { border: 0; background: transparent; overflow: visible; }
+  .main thead { position: absolute; left: -9999px; }
+  .main tr { margin: 0 0 12px; padding: 4px 14px; background: #fff; border: 1px solid var(--line); border-radius: 8px; }
+  .main td { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; padding: 10px 0; text-align: right; }
+  .main tbody tr:hover td { background: transparent; }
+  .main td::before { content: attr(data-label); flex: none; max-width: 42%; font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); text-align: left; }
+  .main td:not([data-label])::before { content: none; }
+  .main td .cell { min-width: 0; }
+  .main td[data-label="Offer"], .main td:not([data-label]) { justify-content: flex-end; }
+  .main td input[type=text], .main td input[type=number], .main td select { width: 100%; }
+}
