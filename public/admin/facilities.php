@@ -27,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $facilities = db_all(
-    "SELECT f.id, f.name, f.type, f.license_no, f.verification_status, f.active,
+    "SELECT f.id, f.name, f.type, f.ownership, f.license_no, f.verification_status, f.active,
             f.can_request_blood, f.can_report_donors, f.can_transplant, r.name AS region,
             (SELECT COUNT(*) FROM users u WHERE u.facility_id = f.id) AS accounts
        FROM facilities f JOIN regions r ON r.id = f.region_id
@@ -44,7 +44,7 @@ layout_start($user, 'Facilities');
       $rights = array_filter([$f['can_request_blood'] ? 'Request blood' : '', $f['can_report_donors'] ? 'Report donors' : '', $f['can_transplant'] ? 'Transplant' : '']); ?>
     <tr>
       <td><?= e($f['name']) ?><br><span class="code"><?= e($f['license_no']) ?></span></td>
-      <td><?= $f['type'] === 'hospital' ? 'Hospital' : 'Blood bank' ?></td>
+            <td><?= $f['type'] === 'hospital' ? 'Hospital' : 'Blood bank' ?><br><span class="sub"><?= $f['ownership'] === 'private' ? 'Private' : 'Public' ?></span></td>
       <td><?= e($f['region']) ?></td>
       <td><?= $rights ? e(implode(', ', $rights)) : '—' ?></td>
       <td><?= (int)$f['accounts'] ?></td>

@@ -41,6 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!in_array((int)$f['region_id'], array_column($regions, 'id'), true)) { $errors['region_id'] = 'Choose a region.'; }
     if (strlen($f['license_no']) > 40) {
         $errors['license_no'] = 'The licence number is too long.';
+<<<<<<< HEAD
     } elseif ($f['license_no'] !== '' && db_val('SELECT 1 FROM facilities WHERE lower(license_no) = lower(?::text)', [$f['license_no']])) {
         $errors['license_no'] = 'This licence number is already used by another facility.';
     }
@@ -120,3 +121,6 @@ layout_start($user, 'Create facility account');
   <button class="btn" type="submit">Create facility and administrator</button>
 </form>
 <?php layout_end();
+=======
+    }
+>>>>>>> 5180bd0d20ca0d77d0cdace867830330f0b95967

@@ -35,6 +35,7 @@ CREATE TABLE facilities (
   id                  INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   name                VARCHAR(120) NOT NULL,
   type                VARCHAR(12) NOT NULL CHECK (type IN ('hospital','blood_bank')),
+  ownership           VARCHAR(7) NOT NULL DEFAULT 'public' CHECK (ownership IN ('public','private')),
   region_id           INT NOT NULL REFERENCES regions(id),
   license_no          VARCHAR(40),
   verification_status VARCHAR(10) NOT NULL DEFAULT 'pending' CHECK (verification_status IN ('pending','approved','rejected')),
