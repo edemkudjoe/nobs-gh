@@ -31,7 +31,7 @@ layout_start($user, 'Blood availability');
       <td><?= $n ?></td>
       <td><?= (int)$g['in_region'] ?></td>
       <td><?= (int)$g['soon'] ?></td>
-      <td><?= $n === 0 ? '<span class="flag">None</span>' : ($n < 5 ? '<strong>Low</strong>' : 'Good') ?></td>
+      <td><?= $n === 0 ? '<span class="badge badge-red">None</span>' : ($n < 5 ? '<span class="badge badge-amber">Low</span>' : '<span class="badge badge-green">Good</span>') ?></td>
     </tr>
   <?php endforeach; ?>
   </tbody>
