@@ -79,9 +79,13 @@
     // Header that only shows on paper.
     var head = document.createElement('div');
     head.className = 'print-head';
-    head.innerHTML = '<strong></strong><span></span>';
-    head.firstChild.textContent = 'National Organ & Blood Bank System: ' + pageTitle;
-    head.lastChild.textContent = 'Printed ' + stamp.toLocaleString() + (whoText ? ' by ' + whoText : '') + '. Contains confidential information.';
+        var headText = document.createElement('div');
+    headText.innerHTML = '<strong></strong><span></span>';
+    headText.firstChild.textContent = 'National Organ & Blood Bank System: ' + pageTitle;
+    headText.lastChild.textContent = 'Printed ' + stamp.toLocaleString() + (whoText ? ' by ' + whoText : '') + '. Contains confidential information.';
+    var logoBox = tools.querySelector('.print-logos');
+    if (logoBox) { head.appendChild(logoBox); }
+    head.appendChild(headText);
     tools.insertBefore(head, tools.firstChild);
 
     // Columns that only hold buttons or forms are left out of print and CSV.
