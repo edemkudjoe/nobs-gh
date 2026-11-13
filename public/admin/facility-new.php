@@ -3,6 +3,23 @@ declare(strict_types=1);
 require_once __DIR__ . '/../../includes/layout.php';
 $user = require_capability('admin');
 
+
+/**
+ * Registration ID such as H-GAR-0001: H hospital or B blood bank, a region code, then a running number
+ * for that type and region. Call it inside a transaction.
+ */
+function next_registration_id(string $type, string $regionName): string
+{
+    $codes = ['Greater Accra' => 'GAR', 'Ashanti' => 'ASH', 'Eastern' => 'EAS', 'Northern' => 'NOR', 'Volta' => 'VOL',
+              'Western' => 'WES', 'Western North' => 'WNR', 'Central' => 'CEN', 'Oti' => 'OTI', 'Savannah' => 'SAV',
+              'North East' => 'NEA', 'Upper East' => 'UEA', 'Upper West' => 'UWE', 'Bono' => 'BON', 'Bono East' => 'BOE', 'Ahafo' => 'AHA'];
+    $code   = $codes[$regionName] ?? strtoupper(substr((string)preg_replace('/[^A-Za-z]/', '', $regionName), 0, 3));
+    $prefix = ($type === 'hospital' ? 'H' : 'B') . '-' . $code . '-';
+    db_val('SELECT pg_advisory_xact_lock(7301)');   // two admins saving at once must not get the same number
+    $last = (int)db_val('SELECT MAX(CAST(right(license_no, 4) AS INT)) FROM facilities WHERE license_no ~ ?::text', ['^' . $prefix . '[0-9]{4}$']);
+    return sprintf('%s%04d', $prefix, $last + 1);
+}
+
 $regions = db_all('SELECT id, name FROM regions ORDER BY name');
 $errors  = [];
 $f = ['name' => '', 'type' => 'hospital', 'ownership' => 'public', 'region_id' => '', 'license_no' => '', 'admin_name' => '', 'admin_email' => '',
@@ -23,7 +40,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!in_array($f['type'], ['hospital', 'blood_bank'], true)) { $errors['type'] = 'Choose the facility type.'; }
     if (!in_array($f['ownership'], ['public', 'private'], true)) { $errors['ownership'] = 'Choose public or private.'; }
     if (!in_array((int)$f['region_id'], array_column($regions, 'id'), true)) { $errors['region_id'] = 'Choose a region.'; }
-    if (strlen($f['license_no']) > 40) { $errors['license_no'] = 'The licence number is too long.'; }
+        if (strlen($f['license_no']) > 40) {
+        $errors['license_no'] = 'The licence number is too long.';
+    } elseif ($f['license_no'] !== '' && db_val('SELECT 1 FROM facilities WHERE lower(license_no) = lower(?::text)', [$f['license_no']])) {
+        $errors['license_no'] = 'This licence number is already used by another facility.';
+    }
     if (mb_strlen($f['admin_name']) < 2 || mb_strlen($f['admin_name']) > 120) { $errors['admin_name'] = 'Enter the administrator\'s name.'; }
     if (!filter_var($f['admin_email'], FILTER_VALIDATE_EMAIL) || strlen($f['admin_email']) > 160) {
         $errors['admin_email'] = 'Enter a valid email address.';
@@ -31,13 +52,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors['admin_email'] = 'An account with this email already exists.';
     }
 
-    if (!$errors) {
-        $pw = temp_password();
-        db_transaction(function () use ($user, $f, $pw) {
+            $pw = temp_password();
+        $regionName = '';
+        foreach ($regions as $r) {
+            if ((int)$r['id'] === (int)$f['region_id']) { $regionName = (string)$r['name']; }
+        }
+        $license = db_transaction(function () use ($user, $f, $pw, $regionName) {
+            $license = $f['license_no'] !== '' ? $f['license_no'] : next_registration_id($f['type'], $regionName);
             $fid = db_val(
                 "INSERT INTO facilities (name, type, ownership, region_id, license_no, verification_status, can_request_blood, can_report_donors, can_transplant)
                  VALUES (?, ?, ?, ?, ?, 'approved', ?, ?, ?) RETURNING id",
-                [$f['name'], $f['type'], $f['ownership'], (int)$f['region_id'], $f['license_no'] === '' ? null : $f['license_no'],
+                [$f['name'], $f['type'], $f['ownership'], (int)$f['region_id'], $license,
                  $f['can_request_blood'] ? 't' : 'f', $f['can_report_donors'] ? 't' : 'f', $f['can_transplant'] ? 't' : 'f']
             );
             db_exec(
@@ -48,8 +73,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             );
             db_exec("INSERT INTO audit_log (user_id, action, entity, entity_id, detail) VALUES (?, 'facility_created', 'facility', ?, ?)",
                     [$user['id'], $fid, $f['name']]);
+              return $license;
         });
-        flash_set("{$f['name']} was created. Administrator {$f['admin_email']}, temporary password: $pw (shown only once).");
+        flash_set("{$f['name']} was created with ID {$license}. Administrator {$f['admin_email']}, temporary password: $pw (shown only once).");
         redirect('/admin/facilities.php');
     }
 }
