@@ -15,7 +15,7 @@ function nav_items(array $user): array
             'Overview' => [['Dashboard', '/admin/dashboard.php', '']],
             'Blood'    => [['Blood requests', '/admin/blood-requests.php', ''], ['Blood offers', '/admin/blood-offers.php', ''], ['Inventory', '/admin/inventory.php', '']],
             'Organs'   => [['Waiting list', '/admin/waiting-list.php', ''], ['Organ offers', '/admin/organ-offers.php', '']],
-            'Admin'    => [['Facilities', '/admin/facilities.php', ''], ['Travel times', '/admin/travel-times.php', ''], ['Settings', '/admin/settings.php', ''], ['Audit log', '/admin/audit.php', '']],
+            'Admin'    => [['Facilities', '/admin/facilities.php', ''], ['Travel times', '/admin/travel-times.php', ''], ['Settings', '/admin/settings.php', ''], ['Audit log', '/admin/audit.php', ''], ['Clear all data', '/admin/reset-data.php', '']],
         ],
         'center' => [
             'Overview'  => [['Dashboard', '/center/dashboard.php', '']],
@@ -118,7 +118,7 @@ function layout_start(array $user, string $title): void
         <?php endforeach; ?>
       <?php endforeach; ?>
     </nav>
-    <main class="main">
+    <main class="main"<?= in_array($user['role'], ['admin', 'hospital'], true) ? ' data-tools="1"' : '' ?>>
       <h1><?= e($title) ?></h1>
 <?php
     flash_show();
