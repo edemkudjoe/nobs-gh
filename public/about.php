@@ -21,7 +21,6 @@ public_start('About', '/about.php');
       <h1 class="h52">Coordination starts with the people doing the work.</h1>
       <p class="body">Center staff keep stock and record tests. Hospital staff record needs. The national administrator reviews them and coordinates between facilities. Each decision needs clear information and a visible next step.</p>
       <p class="body">This system brings that work into one place, connecting donors, stock, requests and the records that explain what happened.</p>
-      <p class="body">A student project for Full-Stack Web Development at UPSA, built by a team of six. It uses sample data and is not an official NBS, MoH or GHS system.</p>
     </div>
   </div>
 </section>
