@@ -5,12 +5,12 @@ $user = require_capability('admin');
 
 $regions = db_all('SELECT id, name FROM regions ORDER BY name');
 $errors  = [];
-$f = ['name' => '', 'type' => 'hospital', 'region_id' => '', 'license_no' => '', 'admin_name' => '', 'admin_email' => '',
+$f = ['name' => '', 'type' => 'hospital', 'ownership' => 'public', 'region_id' => '', 'license_no' => '', 'admin_name' => '', 'admin_email' => '',
       'can_request_blood' => '', 'can_report_donors' => '', 'can_transplant' => ''];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check();
-    foreach (['name', 'type', 'region_id', 'license_no', 'admin_name', 'admin_email'] as $k) {
+    foreach (['name', 'type', 'ownership', 'region_id', 'license_no', 'admin_name', 'admin_email'] as $k) {
         $f[$k] = trim((string)($_POST[$k] ?? ''));
     }
     $f['admin_email'] = mb_strtolower($f['admin_email']);
@@ -21,6 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (mb_strlen($f['name']) < 3 || mb_strlen($f['name']) > 120) { $errors['name'] = 'Enter the facility name.'; }
     if (!in_array($f['type'], ['hospital', 'blood_bank'], true)) { $errors['type'] = 'Choose the facility type.'; }
+      if (!in_array($f['ownership'], ['public', 'private'], true)) { $errors['ownership'] = 'Choose public or private.'; }
     if (!in_array((int)$f['region_id'], array_column($regions, 'id'), true)) { $errors['region_id'] = 'Choose a region.'; }
     if (strlen($f['license_no']) > 40) { $errors['license_no'] = 'The licence number is too long.'; }
     if (mb_strlen($f['admin_name']) < 2 || mb_strlen($f['admin_name']) > 120) { $errors['admin_name'] = 'Enter the administrator\'s name.'; }
@@ -34,9 +35,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $pw = temp_password();
         db_transaction(function () use ($user, $f, $pw) {
             $fid = db_val(
-                "INSERT INTO facilities (name, type, region_id, license_no, verification_status, can_request_blood, can_report_donors, can_transplant)
-                 VALUES (?, ?, ?, ?, 'approved', ?, ?, ?) RETURNING id",
-                [$f['name'], $f['type'], (int)$f['region_id'], $f['license_no'] === '' ? null : $f['license_no'],
+                "INSERT INTO facilities (name, type, ownership, region_id, license_no, verification_status, can_request_blood, can_report_donors, can_transplant)
+                 VALUES (?, ?, ?, ?, ?, 'approved', ?, ?, ?) RETURNING id,
+                [$f['name'], $f['type'], $f['ownership'], (int)$f['region_id'], $f['license_no'] === '' ? null : $f['license_no'],
                  $f['can_request_blood'] ? 't' : 'f', $f['can_report_donors'] ? 't' : 'f', $f['can_transplant'] ? 't' : 'f']
             );
             db_exec(
@@ -65,6 +66,11 @@ layout_start($user, 'Create facility account');
       <option value="hospital"<?= $f['type'] === 'hospital' ? ' selected' : '' ?>>Hospital</option>
       <option value="blood_bank"<?= $f['type'] === 'blood_bank' ? ' selected' : '' ?>>Blood bank (centre)</option>
     </select><?php field_error($errors, 'type'); ?></div>
+        <div class="field"><label for="ownership">Public or private</label>
+    <select id="ownership" name="ownership">
+      <option value="public"<?= $f['ownership'] === 'public' ? ' selected' : '' ?>>Public (government or agency)</option>
+      <option value="private"<?= $f['ownership'] === 'private' ? ' selected' : '' ?>>Private</option>
+    </select><?php field_error($errors, 'ownership'); ?></div>
   <div class="field"><label for="region_id">Region</label>
     <select id="region_id" name="region_id" required><option value="">Choose…</option>
       <?php foreach ($regions as $r): ?><option value="<?= (int)$r['id'] ?>"<?= (string)$r['id'] === $f['region_id'] ? ' selected' : '' ?>><?= e($r['name']) ?></option><?php endforeach; ?>
