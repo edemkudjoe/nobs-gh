@@ -224,9 +224,12 @@ function public_start(string $title, string $current = ''): void
     $links = ['/' => 'Home', '/about.php' => 'About', '/how-it-works.php' => 'How it works', '/features.php' => 'Features'];
     site_head($title);
     ?>
-  <header class="site-top">
+    <header class="site-top" id="sitetop">
     <div class="site-id"><?= site_logos() ?><span class="site-name">National Organ &amp; Blood Bank System</span></div>
-    <nav class="site-nav" aria-label="Main">
+    <button type="button" class="site-toggle" id="sitetoggle" aria-controls="sitenav" aria-expanded="false" aria-label="Menu">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+    <nav class="site-nav" id="sitenav" aria-label="Main">
       <?php foreach ($links as $url => $label): ?>
         <a href="<?= e($url) ?>"<?= $url === $current ? ' class="on" aria-current="page"' : '' ?>><?= e($label) ?></a>
       <?php endforeach; ?>
