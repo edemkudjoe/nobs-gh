@@ -66,6 +66,21 @@
     }
   });
 
+    /* 3. Menu button for the public pages (phones). */
+  var siteTop = document.getElementById('sitetop');
+  var siteToggle = document.getElementById('sitetoggle');
+  if (siteTop && siteToggle) {
+    var setSite = function (open) {
+      siteTop.classList.toggle('site-open', open);
+      siteToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    };
+    siteToggle.addEventListener('click', function () { setSite(!siteTop.classList.contains('site-open')); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { setSite(false); } });
+    document.addEventListener('click', function (e) { if (!siteTop.contains(e.target)) { setSite(false); } });
+  }
+
+  /* 4. Menu button for the signed-in pages. */
+  
   /* 2. Menu button for the signed-in pages. */
   var toggle = document.getElementById('navtoggle');
   var nav = document.getElementById('sidenav');
