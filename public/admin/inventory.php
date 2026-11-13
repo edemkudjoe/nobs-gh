@@ -47,7 +47,7 @@ layout_start($user, 'National blood inventory');
       <td><?= (int)$g['reserved'] ?></td>
       <td><?= (int)$g['testing'] ?></td>
       <td><?= (int)$g['near'] ?></td>
-      <td><?= $isLow ? '<span class="flag">Low stock</span>' : 'OK' ?></td>
+      <td><?= $isLow ? '<span class="badge badge-red">Low stock</span>' : '<span class="badge badge-green">OK</span>' ?></td>
     </tr>
   <?php endforeach; ?>
   </tbody>
