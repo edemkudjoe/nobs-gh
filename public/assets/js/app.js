@@ -66,6 +66,92 @@
     }
   });
 
+  /* 2b. Print / PDF and CSV for administrators and hospitals. */
+  var tools = document.querySelector('.main[data-tools]');
+  if (tools && tools.querySelector('table:not(.no-tools)')) {
+    var h1 = tools.querySelector('h1');
+    var pageTitle = h1 ? h1.textContent.trim() : document.title;
+    var stamp = new Date();
+    var day = stamp.toISOString().slice(0, 10);
+    var whoEl = document.querySelector('.who');
+    var whoText = whoEl ? whoEl.textContent.replace('Sign out', '').replace(/\s+/g, ' ').trim() : '';
+
+    // Header that only shows on paper.
+    var head = document.createElement('div');
+    head.className = 'print-head';
+    head.innerHTML = '<strong></strong><span></span>';
+    head.firstChild.textContent = 'National Organ & Blood Bank System: ' + pageTitle;
+    head.lastChild.textContent = 'Printed ' + stamp.toLocaleString() + (whoText ? ' by ' + whoText : '') + '. Contains confidential information.';
+    tools.insertBefore(head, tools.firstChild);
+
+    // Columns that only hold buttons or forms are left out of print and CSV.
+    var skipFor = function (table) {
+      var rows = Array.prototype.filter.call(table.querySelectorAll('tbody tr'), function (tr) { return !tr.querySelector('td[colspan]'); });
+      var n = table.querySelectorAll('thead th').length;
+      var skip = [];
+      for (var i = 0; i < n; i++) {
+        var allActions = rows.length > 0;
+        rows.forEach(function (tr) {
+          var td = tr.children[i];
+          if (!td || !td.querySelector('form, button')) { allActions = false; }
+        });
+        if (allActions) { skip.push(i); }
+      }
+      skip.forEach(function (i) {
+        var th = table.querySelectorAll('thead th')[i];
+        if (th) { th.classList.add('no-print'); }
+        rows.forEach(function (tr) { if (tr.children[i]) { tr.children[i].classList.add('no-print'); } });
+      });
+      return skip;
+    };
+
+    var csvCell = function (text) { return '"' + text.replace(/"/g, '""') + '"'; };
+    var downloadCsv = function (table, skip, name) {
+      var lines = [];
+      var heads = Array.prototype.filter.call(table.querySelectorAll('thead th'), function (th, i) { return skip.indexOf(i) < 0; });
+      lines.push(heads.map(function (th) { return csvCell(th.textContent.trim()); }).join(','));
+      table.querySelectorAll('tbody tr').forEach(function (tr) {
+        if (tr.querySelector('td[colspan]')) { return; }
+        var cells = Array.prototype.filter.call(tr.children, function (td, i) { return skip.indexOf(i) < 0; });
+        lines.push(cells.map(function (td) {
+          var t = (td.innerText || td.textContent).replace(/\s*\n\s*/g, ' / ').replace(/\s+/g, ' ').trim();
+          return csvCell(t);
+        }).join(','));
+      });
+      var blob = new Blob(['\ufeff' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '-' + day + '.csv';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    };
+
+    var bar = document.createElement('div');
+    bar.className = 'tools';
+    var printBtn = document.createElement('button');
+    printBtn.type = 'button';
+    printBtn.className = 'btn btn-quiet';
+    printBtn.textContent = 'Print or save as PDF';
+    printBtn.addEventListener('click', function () { window.print(); });
+    bar.appendChild(printBtn);
+    if (h1) { h1.insertAdjacentElement('afterend', bar); } else { tools.insertBefore(bar, tools.firstChild); }
+
+    tools.querySelectorAll('table:not(.no-tools)').forEach(function (table, n) {
+      var skip = skipFor(table);
+      var prev = table.closest('.table-wrap');
+      var label = prev && prev.previousElementSibling && /^H[23]$/.test(prev.previousElementSibling.tagName)
+        ? prev.previousElementSibling.textContent.trim() : pageTitle + (n ? ' ' + (n + 1) : '');
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'btn btn-quiet btn-small csv-btn';
+      b.textContent = 'Download CSV';
+      b.setAttribute('aria-label', 'Download ' + label + ' as CSV');
+      b.addEventListener('click', function () { downloadCsv(table, skip, label); });
+      if (prev) { prev.parentNode.insertBefore(b, prev); }
+    });
+  }
+  
     /* 3. Menu button for the public pages (phones). */
   var siteTop = document.getElementById('sitetop');
   var siteToggle = document.getElementById('sitetoggle');
@@ -79,9 +165,8 @@
     document.addEventListener('click', function (e) { if (!siteTop.contains(e.target)) { setSite(false); } });
   }
 
-  /* 4. Menu button for the signed-in pages. */
   
-  /* 2. Menu button for the signed-in pages. */
+  /* 4. Menu button for the signed-in pages. */
   var toggle = document.getElementById('navtoggle');
   var nav = document.getElementById('sidenav');
   if (!toggle || !nav) { return; }
