@@ -442,3 +442,14 @@ body { font-size: 17px; line-height: 1.55; }
 .fine { font-size: 13px; }
 .btn-small { font-size: 15px; }
 :focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+
+/* logos on the printed page */
+.print-logos { display: none; }
+.badge { white-space: nowrap; }
+@media print {
+  .print-head { display: flex; align-items: center; gap: 12pt; }
+  .print-head .print-logos { display: block; flex: none; }
+  .print-head .logos { display: flex; gap: 8pt; }
+  .print-head .logos img { height: 36pt; width: auto; }
+  .print-head .logos-sep { display: none; }
+}
