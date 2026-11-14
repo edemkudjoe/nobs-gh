@@ -453,3 +453,6 @@ body { font-size: 17px; line-height: 1.55; }
   .print-head .logos img { height: 36pt; width: auto; }
   .print-head .logos-sep { display: none; }
 }
+
+/* read-only fields (for example the registration ID) */
+input[readonly] { background: var(--panel); color: var(--ink); font-family: "IBM Plex Mono", monospace; font-weight: 500; cursor: default; }
