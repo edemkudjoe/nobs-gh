@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__ . '/../includes/layout.php';
+require_once __DIR__ . '/../includes/slip.php';
 $user = require_capability('facility_admin');   // a centre or hospital administrator
 
 $errors = [];
@@ -33,8 +34,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 db_exec("INSERT INTO audit_log (user_id, action, entity, entity_id, detail) VALUES (?, 'staff_created', 'user', ?, ?)",
                         [$user['id'], $id, $f['email']]);
             });
-            flash_set("Account created for {$f['full_name']}. Temporary password: $pw (shown only once. They must change it at first sign-in).");
-            redirect('/staff-accounts.php');
+            render_slip($user, [
+                'title'   => 'Staff account created',
+                'heading' => 'Staff account credentials',
+                'rows'    => [
+                    ['Facility', (string)$user['facility_name']],
+                    ['Staff member', $f['full_name']],
+                    ['Sign-in email', $f['email'], 'mono'],
+                    ['Temporary password', $pw, 'mono big'],
+                    ['Sign in at', signin_url(), 'mono'],
+                ],
+                'steps'   => [
+                    'Open the sign-in address above and sign in with the email and temporary password.',
+                    'You will be asked to choose your own password. The temporary one stops working once you do.',
+                ],
+                'actions' => [['Back to staff accounts', '/staff-accounts.php']],
+            ]);
+            exit;
         }
     } elseif (in_array($action, ['deactivate', 'activate', 'reset'], true)) {
         $target = (int)($_POST['user_id'] ?? 0);
@@ -49,7 +65,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $pw = temp_password();
             db_exec('UPDATE users SET password_hash = ?, must_change_password = TRUE WHERE id = ?', [password_hash($pw, PASSWORD_DEFAULT), $row['id']]);
             db_exec('DELETE FROM sessions WHERE user_id = ?', [$row['id']]);
-            $msg = "New temporary password for {$row['full_name']}: $pw (shown only once).";
+            db_exec("INSERT INTO audit_log (user_id, action, entity, entity_id, detail) VALUES (?, 'staff_reset', 'user', ?, NULL)", [$user['id'], $row['id']]);
+            $em = (string)db_val('SELECT email FROM users WHERE id = ?', [$row['id']]);
+            render_slip($user, [
+                'title'   => 'Password reset',
+                'heading' => 'New temporary password',
+                'rows'    => [
+                    ['Facility', (string)$user['facility_name']],
+                    ['Staff member', (string)$row['full_name']],
+                    ['Sign-in email', $em, 'mono'],
+                    ['Temporary password', $pw, 'mono big'],
+                    ['Sign in at', signin_url(), 'mono'],
+                ],
+                'steps'   => [
+                    'Sign in with the email and the new temporary password above. The old password no longer works.',
+                    'You will be asked to choose your own password.',
+                ],
+                'actions' => [['Back to staff accounts', '/staff-accounts.php']],
+            ]);
+            exit;
         } else {
             db_exec('UPDATE users SET status = ? WHERE id = ?', [$action === 'deactivate' ? 'deactivated' : 'active', $row['id']]);
             if ($action === 'deactivate') {
@@ -80,10 +114,10 @@ layout_start($user, 'Staff accounts');
   <input type="hidden" name="action" value="create">
   <div class="field"><label for="full_name">Full name</label>
     <input id="full_name" name="full_name" type="text" maxlength="120" required value="<?= e($f['full_name']) ?>">
-    <?php field_error($errors, 'full_name'); ?></div>
+    <?php if (isset($errors['full_name'])): ?><div class="alert"><?= e($errors['full_name']) ?></div><?php endif; ?></div>
   <div class="field"><label for="email">Email address</label>
     <input id="email" name="email" type="email" maxlength="160" required value="<?= e($f['email']) ?>">
-    <?php field_error($errors, 'email'); ?></div>
+    <?php if (isset($errors['email'])): ?><div class="alert"><?= e($errors['email']) ?></div><?php endif; ?></div>
   <button class="btn" type="submit">Create account</button>
 </form>
 
