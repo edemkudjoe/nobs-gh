@@ -4,6 +4,17 @@
   'use strict';
   var root = document.documentElement;
 
+  /* 0. Print with a plain file name. A page title with "|" or "&" can make "Save as PDF" fail on phones. */
+  var origTitle = document.title;
+  function cleanTitle() {
+    var h = document.querySelector('.main h1, h1');
+    var base = (h ? h.textContent : origTitle).replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'Page';
+    return 'NOBS-' + base + '-' + new Date().toISOString().slice(0, 10);
+  }
+  window.addEventListener('beforeprint', function () { document.title = cleanTitle(); });
+  window.addEventListener('afterprint', function () { document.title = origTitle; });
+  window.nobsPrint = function () { document.title = cleanTitle(); window.print(); };
+
   /* 1. Eye button on every password field (login.php already has its own). */
   var EYE = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>';
   var EYE_OFF = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/><path d="M3 3l18 18"/></svg>';
@@ -137,7 +148,7 @@
     printBtn.type = 'button';
     printBtn.className = 'btn btn-quiet';
     printBtn.textContent = 'Print or save as PDF';
-    printBtn.addEventListener('click', function () { window.print(); });
+    printBtn.addEventListener('click', function () { window.nobsPrint(); });
     bar.appendChild(printBtn);
     if (h1) { h1.insertAdjacentElement('afterend', bar); } else { tools.insertBefore(bar, tools.firstChild); }
 
