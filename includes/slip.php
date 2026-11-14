@@ -29,7 +29,7 @@ function render_slip(array $user, array $s): void
       <p class="slip-foot">Issued <?= e(date('j F Y')) ?> by <?= e($user['full_name']) ?>.
         Confidential: give this only to the person named above.</p>
     </article>
-    <script>document.getElementById('slip-print').addEventListener('click', function () { window.print(); });</script>
+        <script>document.getElementById('slip-print').addEventListener('click', function () { if (window.nobsPrint) { window.nobsPrint(); } else { window.print(); } });</script>
     <?php
     layout_end();
 }
