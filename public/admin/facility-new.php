@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__ . '/../../includes/layout.php';
+require_once __DIR__ . '/../../includes/slip.php';
 $user = require_capability('admin');
 
 /** Three-letter region code used in registration IDs. */
@@ -26,6 +27,7 @@ function next_registration_id(string $type, string $regionName): string
 
 $regions = db_all('SELECT id, name FROM regions ORDER BY name');
 $errors  = [];
+$slip    = null;   // set after a facility is created, to print the credentials
 $f = ['name' => '', 'type' => 'hospital', 'ownership' => 'public', 'region_id' => '', 'admin_name' => '', 'admin_email' => '',
       'can_request_blood' => '', 'can_report_donors' => '', 'can_transplant' => ''];
 
@@ -75,9 +77,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     [$user['id'], $fid, $f['name']]);
             return $license;
         });
-        flash_set("{$f['name']} was created with ID {$license}. Administrator {$f['admin_email']}, temporary password: $pw (shown only once).");
-        redirect('/admin/facilities.php');
+        // The password is shown on this page only. It is not saved anywhere readable, so it cannot be shown again.
+        $slip = ['facility' => $f['name'], 'license' => $license, 'type' => $f['type'], 'ownership' => $f['ownership'],
+                 'region' => $regionName, 'admin_name' => $f['admin_name'], 'admin_email' => $f['admin_email'], 'password' => $pw];
     }
+}
+
+if ($slip !== null) {
+    render_slip($user, [
+        'title'   => 'Facility created',
+        'heading' => 'Facility account credentials',
+        'rows'    => [
+            ['Facility', $slip['facility']],
+            ['Type', ($slip['type'] === 'hospital' ? 'Hospital' : 'Blood bank') . ' · ' . ($slip['ownership'] === 'private' ? 'Private' : 'Public')],
+            ['Region', $slip['region']],
+            ['Registration ID', $slip['license'], 'mono'],
+            ['Administrator', $slip['admin_name']],
+            ['Sign-in email', $slip['admin_email'], 'mono'],
+            ['Temporary password', $slip['password'], 'mono big'],
+            ['Sign in at', signin_url(), 'mono'],
+        ],
+        'steps'   => [
+            'Open the sign-in address above and sign in with the email and temporary password.',
+            'You will be asked to choose your own password. The temporary one stops working once you do.',
+            'Then create accounts for your own staff from the menu.',
+        ],
+        'actions' => [['Create another facility', '/admin/facility-new.php'], ['Back to facilities', '/admin/facilities.php']],
+    ]);
+    exit;
 }
 
 // Next free number for each type and region, so the form can show the ID before saving.
