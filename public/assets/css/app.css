@@ -456,3 +456,24 @@ body { font-size: 17px; line-height: 1.55; }
 
 /* read-only fields (for example the registration ID) */
 input[readonly] { background: var(--panel); color: var(--ink); font-family: "IBM Plex Mono", monospace; font-weight: 500; cursor: default; }
+
+/* credentials slip after creating a facility */
+.slip-actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 16px; }
+.slip { max-width: 640px; padding: 24px; background: #fff; border: 1px solid var(--line); border-radius: 8px; }
+.slip-head { display: flex; align-items: center; gap: 14px; padding-bottom: 14px; margin-bottom: 14px; border-bottom: 2px solid var(--ink); }
+.slip-head strong { display: block; font-size: 18px; }
+.slip-head span { color: var(--muted); font-size: 14px; }
+.slip-list { display: grid; grid-template-columns: 11rem 1fr; gap: 10px 16px; margin: 0 0 18px; }
+.slip-list dt { color: var(--muted); font-size: 14px; }
+.slip-list dd { margin: 0; overflow-wrap: anywhere; }
+.slip-list .mono { font-family: "IBM Plex Mono", monospace; font-weight: 500; }
+.slip-list .big { font-size: 22px; letter-spacing: .02em; padding: 6px 10px; border: 1px dashed var(--ink); border-radius: 6px; width: fit-content; }
+.slip-steps { margin: 0 0 16px; padding-left: 20px; }
+.slip-foot { font-size: 13px; color: var(--muted); margin: 0; }
+@media (max-width: 520px) { .slip-list { grid-template-columns: 1fr; gap: 2px; } .slip-list dd { margin-bottom: 8px; } }
+@media print {
+  .slip-actions, .slip-warn { display: none !important; }
+  .slip { max-width: none; border: 0; padding: 0; }
+  .slip-head span, .slip-foot, .slip-list dt { color: #000; }
+  .slip-list .big { font-size: 18pt; }
+}
