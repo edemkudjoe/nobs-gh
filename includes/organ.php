@@ -15,7 +15,7 @@ require_once __DIR__ . '/blood.php';   // for blood_urgency_rank()
 function organ_candidates(int $organ_id): array
 {
     $o = db_one(
-        "SELECT o.id, o.organ_type, dr.blood_group_id AS donor_group, h.region_id AS from_region
+        "SELECT o.id, o.organ_type, dr.blood_group_id AS donor_group, dr.hospital_id AS donor_hospital, h.region_id AS from_region
            FROM organs o JOIN donor_reports dr ON dr.id = o.donor_report_id JOIN facilities h ON h.id = dr.hospital_id
           WHERE o.id = ?", [$organ_id]);
     if (!$o) {
@@ -24,7 +24,8 @@ function organ_candidates(int $organ_id): array
     return db_all(
         "SELECT * FROM (
             SELECT w.id, w.patient_ref, w.urgency, w.registered_at, f.name AS center, r.name AS region,
-                   CASE WHEN f.region_id = ?::int THEN ?::numeric ELSE rt.hours END AS travel_hours
+                   CASE WHEN f.region_id = ?::int THEN ?::numeric ELSE rt.hours END AS travel_hours,
+                   (f.id = ?::int) AS same_hospital
               FROM waiting_list w
               JOIN facilities f ON f.id = w.transplant_center_id AND f.active AND f.verification_status = 'approved' AND f.can_transplant
               JOIN regions r ON r.id = f.region_id
@@ -34,7 +35,7 @@ function organ_candidates(int $organ_id): array
                AND NOT EXISTS (SELECT 1 FROM organ_offers x WHERE x.organ_id = ? AND x.waiting_list_id = w.id AND x.response IN ('declined','timed_out'))
          ) c
          ORDER BY " . blood_urgency_rank('c') . ", c.registered_at, c.travel_hours NULLS LAST, c.region, c.id",
-        [$o['from_region'], setting_float('same_region_hours'), $o['from_region'], $o['from_region'], $o['organ_type'], $o['donor_group'], $organ_id]
+        [$o['from_region'], setting_float('same_region_hours'), $o['donor_hospital'], $o['from_region'], $o['from_region'], $o['organ_type'], $o['donor_group'], $organ_id]
     );
 }
 
@@ -69,6 +70,11 @@ function organ_offer_to(?array $admin, int $organ_id, ?int $waiting_id, string $
         $override = mb_substr($override_reason, 0, 300);
     }
     $patient = $list[$pos];
+    // The hospital that reported the donor also holds this patient: choosing them out of order needs a fuller reason.
+    $same = !empty($patient['same_hospital']);
+    if ($pos > 0 && $same && mb_strlen($override_reason) < 30) {
+        return [false, 'This patient is at the hospital that reported the donor. Give a fuller reason (at least 30 characters) for choosing them out of order.'];
+    }
     db_exec(
         "INSERT INTO organ_offers (organ_id, waiting_list_id, rank_position, respond_by, override_reason, offered_by)
          VALUES (?, ?, ?, LEAST(?::timestamptz, now() + (EXTRACT(EPOCH FROM (?::timestamptz - ?::timestamptz)) * ?::numeric) * INTERVAL '1 second'), ?, ?)",
@@ -77,7 +83,7 @@ function organ_offer_to(?array $admin, int $organ_id, ?int $waiting_id, string $
     db_exec("UPDATE organs SET status = 'offered' WHERE id = ?", [$organ_id]);
     db_exec("INSERT INTO audit_log (user_id, action, entity, entity_id, detail) VALUES (?, ?, 'organ', ?, ?)",
             [$admin['id'] ?? null, $admin ? 'organ_offered' : 'organ_auto_offered', $organ_id,
-             'OG-' . $organ_id . ' to ' . $patient['patient_ref'] . ' (rank ' . ($pos + 1) . ')' . ($override ? ', out of order: ' . $override : '')]);
+             'OG-' . $organ_id . ' to ' . $patient['patient_ref'] . ' (rank ' . ($pos + 1) . ')' . ($same ? ', same hospital as the donor report' : '') . ($override ? ', out of order: ' . $override : '')]);
     return [true, 'OG-' . $organ_id . ' offered to ' . $patient['patient_ref'] . ' at ' . $patient['center'] . '.'];
 }
 
