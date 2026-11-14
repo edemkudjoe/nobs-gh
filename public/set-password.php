@@ -31,7 +31,7 @@ guest_start('Set your own password', $user['must_change_password']
     : 'Choose a new password for your account.');
 ?>
 <?php if ($error): ?><p class="alert" role="alert"><?= e($error) ?></p><?php endif; ?>
-<form method="post" style="max-width:480px">
+<form method="post" style="max-width:480px" id="pwform">
   <?= csrf_field() ?>
   <div class="field"><label for="current_password">Temporary or current password</label>
     <input id="current_password" name="current_password" type="password" required autocomplete="current-password"></div>
@@ -40,6 +40,18 @@ guest_start('Set your own password', $user['must_change_password']
     <input id="new_password" name="new_password" type="password" required minlength="8" autocomplete="new-password"></div>
   <div class="field"><label for="confirm_password">Repeat new password</label>
     <input id="confirm_password" name="confirm_password" type="password" required minlength="8" autocomplete="new-password"></div>
-  <div class="form-actions"><button class="btn" type="submit">Save and continue</button></div>
+  <div class="form-actions"><button class="btn" type="submit" id="pwsave">Save and continue</button></div>
 </form>
+<script>
+// One press only: a second submit would check the old password after it was already replaced.
+(function () {
+  var form = document.getElementById('pwform'), btn = document.getElementById('pwsave');
+  form.addEventListener('submit', function (e) {
+    if (btn.disabled) { e.preventDefault(); return; }
+    btn.disabled = true;
+    btn.textContent = 'Saving…';
+  });
+  window.addEventListener('pageshow', function () { btn.disabled = false; btn.textContent = 'Save and continue'; });
+})();
+</script>
 <?php guest_end();
