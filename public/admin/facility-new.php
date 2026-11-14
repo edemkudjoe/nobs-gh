@@ -116,4 +116,30 @@ layout_start($user, 'Create facility account');
   <p class="hint">Only for hospitals. Ignored for blood banks.</p>
   <label class="check"><input type="checkbox" name="can_request_blood" value="1"<?= $f['can_request_blood'] ? ' checked' : '' ?>><span>Can request blood</span></label>
   <label class="check"><input type="checkbox" name="can_report_donors" value="1"<?= $f['can_report_donors'] ? ' checked' : '' ?>><span>Can report organ donors</span></label>
-  <label class="check"><input type="checkbox" name="can_transplant" value="1"<?= $f['can_transplant'] ? ' checked'
+  <label class="check"><input type="checkbox" name="can_transplant" value="1"<?= $f['can_transplant'] ? ' checked' : '' ?>><span>Can register patients and receive organs (transplant centre)</span></label>
+
+  <h2>First administrator</h2>
+  <div class="field"><label for="admin_name">Full name</label>
+    <input id="admin_name" name="admin_name" type="text" maxlength="120" required value="<?= e($f['admin_name']) ?>"><?php field_error($errors, 'admin_name'); ?></div>
+  <div class="field"><label for="admin_email">Email address</label>
+    <input id="admin_email" name="admin_email" type="email" maxlength="160" required value="<?= e($f['admin_email']) ?>"><?php field_error($errors, 'admin_email'); ?></div>
+  <p class="hint">A temporary password is shown once after you save. They must change it at first sign-in.</p>
+  <button class="btn" type="submit">Create facility and administrator</button>
+</form>
+<script>
+(function () {
+  var next = <?= json_encode($nextNo, JSON_HEX_TAG | JSON_HEX_AMP | JSON_FORCE_OBJECT) ?>;
+  var type = document.getElementById('type'), region = document.getElementById('region_id'), out = document.getElementById('license_no');
+  function update() {
+    var opt = region.options[region.selectedIndex];
+    var code = opt ? opt.getAttribute('data-code') : '';
+    if (!code) { out.value = ''; return; }
+    var prefix = (type.value === 'hospital' ? 'H' : 'B') + '-' + code + '-';
+    out.value = prefix + String(next[prefix] || 1).padStart(4, '0');
+  }
+  type.addEventListener('change', update);
+  region.addEventListener('change', update);
+  update();
+})();
+</script>
+<?php layout_end();
