@@ -118,8 +118,8 @@ function layout_start(array $user, string $title): void
         <?php endforeach; ?>
       <?php endforeach; ?>
     </nav>
-    <main class="main"<?= in_array($user['role'], ['admin', 'hospital'], true) ? ' data-tools="1"' : '' ?>>
-          <?php if (in_array($user['role'], ['admin', 'hospital'], true)): ?><div class="print-logos"><?= site_logos() ?></div><?php endif; ?>
+    <main class="main"<?= in_array($user['role'], ['admin', 'hospital', 'center'], true) ? ' data-tools="1"' : '' ?>>
+          <?php if (in_array($user['role'], ['admin', 'hospital', 'center'], true)): ?><div class="print-logos"><?= site_logos() ?></div><?php endif; ?>
       <h1><?= e($title) ?></h1>
 <?php
     flash_show();
