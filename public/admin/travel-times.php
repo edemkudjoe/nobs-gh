@@ -61,7 +61,7 @@ layout_start($user, 'Travel times between regions');
 </div>
 <form method="post" novalidate>
   <?= csrf_field() ?>
-  <table>
+    <table class="no-tools">
     <thead><tr><th>From</th><th>To</th><th>Hours by road</th></tr></thead>
     <tbody>
     <?php foreach ($pairs as $p): ?>
