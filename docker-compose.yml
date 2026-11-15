@@ -1,8 +1,8 @@
 services:
   app:
-    build: 
-    context: .
-    dockerfile: Dockerfile.vercel
+    build:
+      context: .
+      dockerfile: Dockerfile.vercel
     ports:
       - "8080:80"
     env_file: .env
@@ -22,7 +22,7 @@ services:
       - "5432:5432"
     volumes:
       - dbdata:/var/lib/postgresql/data
-      - ./sql:/docker-entrypoint-initdb.d   # runs schema.sql then seed.sql on first start
+      - ./sql:/docker-entrypoint-initdb.d   # on first start runs schema.sql, then seed-reference.sql, then travel-times.sql
 
 volumes:
   dbdata:
