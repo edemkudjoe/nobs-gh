@@ -32,7 +32,6 @@ public_start('Sign in', '/login.php');
       <div class="ab-big">Every offer and decision, on the record.</div>
       <p>Sign in to book a donation, manage stock, or respond to an offer.</p>
     </div>
-    <div class="ab-fine">Student project prototype</div>
   </div>
   <div class="auth-side">
     <form class="auth-card" method="post">
