@@ -12,15 +12,39 @@ final class MiniPdf
     public const W = 595.28;
     public const H = 841.89;
 
-    /** Text is written in the PDF's Windows-1252 encoding. */
+        /**
+     * Text is written in the PDF's Windows-1252 encoding. Done by hand, with no iconv or mbstring,
+     * because Alpine's iconv does not support the options a conversion would need.
+     */
     private static function enc(string $s): string
     {
-        $s = str_replace(["\u{2026}", "\u{2013}", "\u{2014}", "\u{2018}", "\u{2019}", "\u{201C}", "\u{201D}"], ['...', '-', '-', "'", "'", '"', '"'], $s);
-        $t = @iconv('UTF-8', 'Windows-1252//TRANSLIT//IGNORE', $s);
-        $t = $t === false ? preg_replace('/[^\x20-\x7E]/', '?', $s) : $t;
-        return str_replace(['\\', '(', ')', "\r", "\n"], ['\\\\', '\\(', '\\)', '', ' '], $t);
+        static $extra = [0x20AC => 0x80, 0x2026 => 0x85, 0x2018 => 0x91, 0x2019 => 0x92, 0x201C => 0x93, 0x201D => 0x94, 0x2022 => 0x95, 0x2013 => 0x96, 0x2014 => 0x97];
+        $chars = preg_split('//u', $s, -1, PREG_SPLIT_NO_EMPTY);
+        if ($chars === false) {
+            return preg_replace('/[^\x20-\x7E]/', '?', str_replace(['\\', '(', ')'], ['\\\\', '\\(', '\\)'], $s));
+        }
+        $out = '';
+        foreach ($chars as $ch) {
+            $o = ord($ch[0]);
+            $n = strlen($ch);
+            $cp = $n === 1 ? $o : ($n === 2 ? (($o & 0x1F) << 6) | (ord($ch[1]) & 0x3F)
+                : ($n === 3 ? (($o & 0x0F) << 12) | ((ord($ch[1]) & 0x3F) << 6) | (ord($ch[2]) & 0x3F) : 0xFFFF));
+            if ($cp === 9 || $cp === 10 || $cp === 13) {
+                $out .= ' ';
+            } elseif ($cp === 0x5C || $cp === 0x28 || $cp === 0x29) {
+                $out .= '\\' . $ch;
+            } elseif ($cp >= 0x20 && $cp <= 0x7E) {
+                $out .= $ch;
+            } elseif ($cp >= 0xA0 && $cp <= 0xFF) {
+                $out .= chr($cp);
+            } elseif (isset($extra[$cp])) {
+                $out .= chr($extra[$cp]);
+            } else {
+                $out .= '?';
+            }
+        }
+        return $out;
     }
-
     private static function rgb(string $hex): string
     {
         $hex = ltrim($hex, '#');
