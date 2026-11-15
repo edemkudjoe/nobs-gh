@@ -55,14 +55,14 @@ $filled = count(array_filter($input, fn($v) => $v !== ''));
 
 layout_start($user, 'Travel times between regions');
 ?>
-<p>Hours by road between each pair of regions, used to rank hospitals for an organ offer. One number covers both directions. A blank pair ranks last when everything else ties.</p>
+<p>Helicopter flight hours between each pair of regions,used to rank hospitals for an organ offer. One number covers both directions. A blank pair ranks last when everything else ties.</p>
 <div class="tiles">
   <div class="tile"><div class="label">Pairs filled in</div><div class="value"><?= $filled ?> of <?= count($pairs) ?></div></div>
 </div>
 <form method="post" novalidate>
   <?= csrf_field() ?>
     <table class="no-tools">
-    <thead><tr><th>From</th><th>To</th><th>Hours by road</th></tr></thead>
+    <thead><tr><th>From</th><th>To</th><th>Hours by air</th></tr></thead>
     <tbody>
     <?php foreach ($pairs as $p): ?>
       <tr>
