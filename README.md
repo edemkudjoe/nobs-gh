@@ -122,4 +122,4 @@ Rules such as the minimum donor age, weight, gap between donations, booking wind
 
 ## Team
 
-Group 2, IT8, UPSA. Add team member names, IDs, course and lecturer here.
+Group 2, IT8, UPSA. 
