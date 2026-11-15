@@ -90,7 +90,7 @@
     // Header that only shows on paper.
     var head = document.createElement('div');
     head.className = 'print-head';
-        var headText = document.createElement('div');
+    var headText = document.createElement('div');
     headText.innerHTML = '<strong></strong><span></span>';
     headText.firstChild.textContent = 'National Organ & Blood Bank System: ' + pageTitle;
     headText.lastChild.textContent = 'Printed ' + stamp.toLocaleString() + (whoText ? ' by ' + whoText : '') + '. Contains confidential information.';
@@ -147,8 +147,102 @@
     var printBtn = document.createElement('button');
     printBtn.type = 'button';
     printBtn.className = 'btn btn-quiet';
-    printBtn.textContent = 'Print or save as PDF';
+    printBtn.textContent = 'Print';
     printBtn.addEventListener('click', function () { window.nobsPrint(); });
+    // Download as a real PDF file (built in the browser, so it does not depend on the print dialog).
+    var pdfBtn = document.createElement('button');
+    pdfBtn.type = 'button';
+    pdfBtn.className = 'btn';
+    pdfBtn.textContent = 'Download PDF';
+    var loadScript = function (src) {
+      return new Promise(function (ok, fail) {
+        var el = document.createElement('script');
+        el.src = src; el.onload = ok; el.onerror = function () { fail(new Error('Could not load ' + src)); };
+        document.head.appendChild(el);
+      });
+    };
+    var logoData = function (img) {
+      return new Promise(function (ok) {
+        var i = new Image();
+        i.onload = function () {
+          var c = document.createElement('canvas');
+          c.width = i.naturalWidth; c.height = i.naturalHeight;
+          var g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height); g.drawImage(i, 0, 0);
+          ok({ url: c.toDataURL('image/jpeg', 0.9), w: c.width, h: c.height });
+        };
+        i.onerror = function () { ok(null); };
+        i.src = img.src;
+      });
+    };
+    var makePdf = function () {
+      var tables = Array.prototype.slice.call(tools.querySelectorAll('table:not(.no-tools)'));
+      var wide = tables.some(function (t) { return t.querySelectorAll('thead th:not(.no-print)').length > 6; });
+      var JsPdf = window.jspdf.jsPDF;
+      var doc = new JsPdf({ orientation: wide ? 'landscape' : 'portrait', unit: 'pt', format: 'a4' });
+      var pw = doc.internal.pageSize.getWidth(), ph = doc.internal.pageSize.getHeight(), m = 36;
+      var imgs = Array.prototype.slice.call(head.querySelectorAll('.logos img'));
+      return Promise.all(imgs.map(logoData)).then(function (logos) {
+        var x = m;
+        logos.forEach(function (l) {
+          if (!l) { return; }
+          var h = 34, w = h * l.w / l.h;
+          doc.addImage(l.url, 'JPEG', x, m, w, h); x += w + 6;
+        });
+        var tx = x > m ? x + 8 : m;
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(14); doc.setTextColor(31, 58, 95);
+        doc.text('National Organ & Blood Bank System', tx, m + 14);
+        doc.setFont('helvetica', 'normal'); doc.setFontSize(11); doc.setTextColor(60);
+        doc.text(pageTitle, tx, m + 30);
+        doc.setFontSize(8.5); doc.setTextColor(110);
+        var meta = 'Printed ' + stamp.toLocaleString() + (whoText ? ' by ' + whoText : '') + '. Contains confidential information.';
+        doc.text(doc.splitTextToSize(meta, pw - tx - m), tx, m + 44);
+        var y = m + 62;
+        tables.forEach(function (table, n) {
+          var skip = skipFor(table);
+          var wrap = table.closest('.table-wrap');
+          var prev = wrap && wrap.previousElementSibling;
+          if (prev && prev.classList.contains('csv-btn')) { prev = prev.previousElementSibling; }
+          var label = prev && /^H[23]$/.test(prev.tagName) ? prev.textContent.trim() : '';
+          var headRow = Array.prototype.filter.call(table.querySelectorAll('thead th'), function (th, i) { return skip.indexOf(i) < 0; })
+            .map(function (th) { return th.textContent.trim(); });
+          var body = [];
+          table.querySelectorAll('tbody tr').forEach(function (tr) {
+            if (tr.querySelector('td[colspan]')) { return; }
+            body.push(Array.prototype.filter.call(tr.children, function (td, i) { return skip.indexOf(i) < 0; })
+              .map(function (td) { return (td.innerText || td.textContent).replace(/\s*\n\s*/g, ' / ').replace(/\s+/g, ' ').trim(); }));
+          });
+          if (label) {
+            doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.setTextColor(31, 58, 95);
+            if (y > ph - 90) { doc.addPage(); y = m; }
+            doc.text(label, m, y + 8); y += 14;
+          }
+          doc.autoTable({
+            head: [headRow], body: body, startY: y, margin: { left: m, right: m, bottom: 44 },
+            styles: { font: 'helvetica', fontSize: 8.5, cellPadding: 4, overflow: 'linebreak' },
+            headStyles: { fillColor: [31, 58, 95], textColor: 255 },
+            alternateRowStyles: { fillColor: [244, 247, 250] }
+          });
+          y = doc.lastAutoTable.finalY + 22;
+        });
+        var pages = doc.internal.getNumberOfPages();
+        for (var p = 1; p <= pages; p++) {
+          doc.setPage(p); doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(120);
+          doc.text('Page ' + p + ' of ' + pages, pw - m, ph - 20, { align: 'right' });
+          doc.text('Confidential', m, ph - 20);
+        }
+        doc.save('NOBS-' + pageTitle.replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '') + '-' + day + '.pdf');
+      });
+    };
+    pdfBtn.addEventListener('click', function () {
+      if (pdfBtn.disabled) { return; }
+      pdfBtn.disabled = true; pdfBtn.textContent = 'Preparing PDF...';
+      var ready = window.jspdf && window.jspdf.jsPDF && window.jspdf.jsPDF.API.autoTable
+        ? Promise.resolve()
+        : loadScript('/assets/js/vendor/jspdf.umd.min.js').then(function () { return loadScript('/assets/js/vendor/jspdf.plugin.autotable.min.js'); });
+      ready.then(makePdf).catch(function () { alert('The PDF could not be made. Use Print instead.'); })
+        .then(function () { pdfBtn.disabled = false; pdfBtn.textContent = 'Download PDF'; });
+    });
+    bar.appendChild(pdfBtn);
     bar.appendChild(printBtn);
     if (h1) { h1.insertAdjacentElement('afterend', bar); } else { tools.insertBefore(bar, tools.firstChild); }
 
@@ -166,8 +260,8 @@
       if (prev) { prev.parentNode.insertBefore(b, prev); }
     });
   }
-  
-    /* 3. Menu button for the public pages (phones). */
+
+  /* 3. Menu button for the public pages (phones). */
   var siteTop = document.getElementById('sitetop');
   var siteToggle = document.getElementById('sitetoggle');
   if (siteTop && siteToggle) {
@@ -180,7 +274,6 @@
     document.addEventListener('click', function (e) { if (!siteTop.contains(e.target)) { setSite(false); } });
   }
 
-  
   /* 4. Menu button for the signed-in pages. */
   var toggle = document.getElementById('navtoggle');
   var nav = document.getElementById('sidenav');
