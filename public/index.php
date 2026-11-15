@@ -64,7 +64,7 @@ public_start('Every donation, every request', '/');
         <div class="eyebrow">A working view of the system</div>
         <h2 class="big xl">Your day, brought into focus.</h2>
       </div>
-      <p>Requests, offers and stock in one place, so the administrator can decide where to start. Sample data shown.</p>
+      <p>Requests, offers and stock in one place, so the administrator can decide where to start.</p>
     </div>
     <div class="window big" role="img" aria-label="Example of the administrator dashboard with sample data">
       <div class="bar"><i></i><i></i><i></i><span class="t">National system / Administrator workspace</span></div>
