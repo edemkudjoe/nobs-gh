@@ -66,7 +66,7 @@ public_start('Every donation, every request', '/');
       </div>
       <p>Requests, offers and stock in one place, so the administrator can decide where to start.</p>
     </div>
-    <div class="window big" role="img" aria-label="Example of the administrator dashboard with sample data">
+        <div class="window big" role="group" aria-label="Example of the administrator dashboard with sample data">
       <div class="bar"><i></i><i></i><i></i><span class="t">National system / Administrator workspace</span></div>
       <div class="body">
         <div class="menu"><div class="on">Dashboard</div><div>Blood requests</div><div>Blood offers</div><div>Waiting list</div><div>Organ offers</div><div>Inventory</div></div>
