@@ -31,12 +31,19 @@ $groups = [
   <div class="wrap">
     <div class="eyebrow">Features</div>
     <h1>The details behind better coordination.</h1>
-    <p class="lede">What each kind of user can do, and the checks that keep it safe.</p>
+        <p class="lede">What each kind of user can do, and the checks that keep it safe.</p>
+    <div class="chips" id="chips" role="group" aria-label="Show features for" hidden>
+      <button type="button" class="chip" data-filter="all" aria-pressed="true">All roles</button>
+      <button type="button" class="chip" data-filter="donors" aria-pressed="false">Donors</button>
+      <button type="button" class="chip" data-filter="centers" aria-pressed="false">Blood centers</button>
+      <button type="button" class="chip" data-filter="hospitals" aria-pressed="false">Hospitals</button>
+      <button type="button" class="chip" data-filter="admin" aria-pressed="false">Administrator</button>
+    </div>
   </div>
 </section>
 
 <?php foreach ($groups as $i => [$eyebrow, $heading, $cards]): ?>
-<section class="sec<?= $i % 2 === 1 ? ' grey' : '' ?>">
+<section class="sec fgroup<?= $i % 2 === 1 ? ' grey' : '' ?>" data-role="<?= e(['donors', 'centers', 'hospitals', 'admin'][$i]) ?>">
   <div class="wrap">
     <div class="eyebrow"><?= e($eyebrow) ?></div>
     <h2 class="mid"><?= e($heading) ?></h2>
