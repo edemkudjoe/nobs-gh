@@ -8,7 +8,7 @@ public_start('About', '/about.php');
   <div class="wrap split">
     <div class="l">
       <div class="record" role="group" aria-label="Example record with sample data">
-        <div class="tag eyebrow" style="color:var(--muted)">Example record</div>
+                <div class="tag eyebrow" style="color:var(--muted);display:flex;justify-content:space-between;align-items:center;gap:10px"><span>Example record</span><button type="button" class="chip replay" id="replay" hidden>Replay</button></div>
         <div class="t">The records that explain what happened.</div>
         <div class="row"><span class="tm">08:15</span><span>Donor D-0412 reported by Komfo Anokye Teaching Hospital.</span></div>
         <div class="row"><span class="tm">08:16</span><span>Kidney O+ ranked. 3 candidates, 2 left out.</span></div>
