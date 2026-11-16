@@ -236,7 +236,8 @@ function public_start(string $title, string $current = ''): void
       <?php endforeach; ?>
       <a class="btn-line" href="/login.php"<?= $current === '/login.php' ? ' aria-current="page"' : '' ?>>Log in</a>
       <a class="btn" href="/register.php">Register as a donor</a>
-    </nav>
+        </nav>
+    <div class="prog" id="prog" aria-hidden="true"></div>
   </header>
   <main class="site-main">
 <?php
