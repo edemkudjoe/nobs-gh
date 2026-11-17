@@ -556,3 +556,16 @@ input[readonly] { background: var(--panel); color: var(--ink); font-family: "IBM
   .site .btn:hover, .site .btn-line:hover, .cards3 > div:hover, .principles > div:hover, .cards3 > div:hover svg { transform: none; }
   .steps > div, .site-top, .auth-brand p { transition: none; }
 }
+
+/* sign in fills the screen height on desktop */
+.site-main { display: flex; flex-direction: column; }
+.site-main > .auth { flex: 1 0 auto; }
+
+/* home hero on phones: cards stack in the normal flow, nothing overlaps */
+@media (max-width: 720px) {
+  .panel { min-height: 0; padding: 20px 20px 40px; }
+  .pc { width: 100%; animation: none; }
+  .pc .big-line { font-size: 20px; }
+  .pc.blue { width: calc(100% - 24px); margin: 16px 0 0 24px; }
+  .pc-note { position: static; max-width: none; margin-top: 16px; }
+}
