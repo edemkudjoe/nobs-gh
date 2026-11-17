@@ -569,3 +569,26 @@ input[readonly] { background: var(--panel); color: var(--ink); font-family: "IBM
   .pc.blue { width: calc(100% - 24px); margin: 16px 0 0 24px; }
   .pc-note { position: static; max-width: none; margin-top: 16px; }
 }
+
+/* sign in: the headline block sits in the middle of the green side */
+.auth-brand { justify-content: flex-start; }
+.auth-brand > div:nth-child(2) { margin: auto 0; }
+
+/* home working view on phones: tabs on top, content below, numbers in a grid */
+@media (max-width: 720px) {
+  .window .body { display: block; }
+  .window .menu { display: flex; gap: 4px; padding: 6px 8px 0; overflow-x: auto; border-right: 0; border-bottom: 1px solid var(--line); -webkit-overflow-scrolling: touch; }
+  .window .menu div { flex: 0 0 auto; white-space: nowrap; padding: 10px 12px; font-size: 14px; border-left: 0; border-bottom: 3px solid transparent; }
+  .window .menu .on { padding-left: 12px; border-left: 0; border-bottom-color: var(--gold); }
+  .window .main2 { padding: 18px 16px 8px; }
+  .window .tiles { display: grid; grid-template-columns: 1fr 1fr; }
+  .window .tile { padding: 12px 14px; }
+  .window .tile + .tile { border-left: 0; }
+  .window .tile:nth-child(even) { border-left: 1px solid var(--line); }
+  .window .tile:nth-child(n+3) { border-top: 1px solid var(--line); }
+  .window .tile .value { font-size: 24px; }
+  .qrow { flex-wrap: wrap; gap: 4px 12px; }
+  .qrow b { flex: 0 0 100%; }
+  .qrow span.d { flex: 1 1 0; min-width: 0; }
+  .qrow > span:last-child { flex: 0 0 auto; }
+}
