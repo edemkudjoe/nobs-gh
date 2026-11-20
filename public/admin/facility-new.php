@@ -28,12 +28,12 @@ function next_registration_id(string $type, string $regionName): string
 $regions = db_all('SELECT id, name FROM regions ORDER BY name');
 $errors  = [];
 $slip    = null;   // set after a facility is created, to print the credentials
-$f = ['name' => '', 'type' => 'hospital', 'ownership' => 'public', 'region_id' => '', 'admin_name' => '', 'admin_email' => '',
+$f = ['name' => '', 'type' => 'hospital', 'ownership' => 'public', 'region_id' => '', 'admin_title' => '', 'admin_title_other' => '', 'admin_name' => '', 'admin_email' => '',
       'can_request_blood' => '', 'can_report_donors' => '', 'can_transplant' => ''];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check();
-    foreach (['name', 'type', 'ownership', 'region_id', 'admin_name', 'admin_email'] as $k) {
+    foreach (['name', 'type', 'ownership', 'region_id', 'admin_title', 'admin_title_other', 'admin_name', 'admin_email'] as $k) {
         $f[$k] = trim((string)($_POST[$k] ?? ''));
     }
     $f['admin_email'] = mb_strtolower($f['admin_email']);
@@ -46,6 +46,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!in_array($f['type'], ['hospital', 'blood_bank'], true)) { $errors['type'] = 'Choose the facility type.'; }
     if (!in_array($f['ownership'], ['public', 'private'], true)) { $errors['ownership'] = 'Choose public or private.'; }
     if (!in_array((int)$f['region_id'], array_column($regions, 'id'), true)) { $errors['region_id'] = 'Choose a region.'; }
+        [$adminTitle, $titleError] = read_title('admin_title');
+    if ($titleError) { $errors['admin_title'] = $titleError; }
     if (mb_strlen($f['admin_name']) < 2 || mb_strlen($f['admin_name']) > 120) { $errors['admin_name'] = 'Enter the administrator\'s name.'; }
     if (!filter_var($f['admin_email'], FILTER_VALIDATE_EMAIL) || strlen($f['admin_email']) > 160) {
         $errors['admin_email'] = 'Enter a valid email address.';
@@ -59,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         foreach ($regions as $r) {
             if ((int)$r['id'] === (int)$f['region_id']) { $regionName = (string)$r['name']; }
         }
-        $license = db_transaction(function () use ($user, $f, $pw, $regionName) {
+        $license = db_transaction(function () use ($user, $f, $pw, $regionName, $adminTitle) {
             $license = next_registration_id($f['type'], $regionName);   // always made here, never taken from the form
             $fid = db_val(
                 "INSERT INTO facilities (name, type, ownership, region_id, license_no, verification_status, can_request_blood, can_report_donors, can_transplant)
@@ -68,9 +70,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                  $f['can_request_blood'] ? 't' : 'f', $f['can_report_donors'] ? 't' : 'f', $f['can_transplant'] ? 't' : 'f']
             );
             db_exec(
-                "INSERT INTO users (full_name, email, password_hash, role, facility_id, is_facility_admin, must_change_password, created_by)
-                 VALUES (?, ?, ?, ?, ?, TRUE, TRUE, ?)",
-                [$f['admin_name'], $f['admin_email'], password_hash($pw, PASSWORD_DEFAULT),
+                "INSERT INTO users (title, full_name, email, password_hash, role, facility_id, is_facility_admin, must_change_password, created_by)
+                 VALUES (?, ?, ?, ?, ?, ?, TRUE, TRUE, ?)",
+                [$adminTitle, $f['admin_name'], $f['admin_email'], password_hash($pw, PASSWORD_DEFAULT),
                  $f['type'] === 'hospital' ? 'hospital' : 'center', $fid, $user['id']]
             );
             db_exec("INSERT INTO audit_log (user_id, action, entity, entity_id, detail) VALUES (?, 'facility_created', 'facility', ?, ?)",
@@ -79,7 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         });
         // The password is shown on this page only. It is not saved anywhere readable, so it cannot be shown again.
         $slip = ['facility' => $f['name'], 'license' => $license, 'type' => $f['type'], 'ownership' => $f['ownership'],
-                 'region' => $regionName, 'admin_name' => $f['admin_name'], 'admin_email' => $f['admin_email'], 'password' => $pw];
+                 'region' => $regionName, 'admin_name' => person_name($adminTitle, $f['admin_name']), 'admin_email' => $f['admin_email'], 'password' => $pw];
     }
 }
 
@@ -146,6 +148,7 @@ layout_start($user, 'Create facility account');
   <label class="check"><input type="checkbox" name="can_transplant" value="1"<?= $f['can_transplant'] ? ' checked' : '' ?>><span>Can register patients and receive organs (transplant centre)</span></label>
 
   <h2>First administrator</h2>
+    <?php title_field('admin_title', $f['admin_title'], $f['admin_title_other'], $errors); ?>
   <div class="field"><label for="admin_name">Full name</label>
     <input id="admin_name" name="admin_name" type="text" maxlength="120" required value="<?= e($f['admin_name']) ?>"><?php field_error($errors, 'admin_name'); ?></div>
   <div class="field"><label for="admin_email">Email address</label>
