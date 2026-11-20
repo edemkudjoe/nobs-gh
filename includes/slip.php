@@ -40,7 +40,7 @@ function render_slip(array $user, array $s): void
       <ol class="slip-steps">
         <?php foreach ($s['steps'] as $step): ?><li><?= e($step) ?></li><?php endforeach; ?>
       </ol>
-      <p class="slip-foot">Issued <?= e(date('j F Y')) ?> by <?= e($user['full_name']) ?>.
+      <p class="slip-foot">Issued <?= e(date('j F Y')) ?> by <?= e(person_name($user['title'], $user['full_name'])) ?>.
         Confidential: give this only to the person named above.</p>
     </article>
     <script>
