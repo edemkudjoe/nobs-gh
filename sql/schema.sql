@@ -46,7 +46,8 @@ CREATE TABLE facilities (
 );
 
 CREATE TABLE users (
-  id                   INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id                   INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  title                VARCHAR(30),
   full_name            VARCHAR(120) NOT NULL,
   email                VARCHAR(160) NOT NULL UNIQUE,
   password_hash        VARCHAR(255) NOT NULL,
