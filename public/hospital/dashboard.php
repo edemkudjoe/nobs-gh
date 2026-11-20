@@ -23,7 +23,7 @@ if (!empty($user['can_transplant'])) {
 
 layout_start($user, 'Dashboard');
 ?>
-<p>Welcome, <?= e($user['full_name']) ?> (<?= e($user['facility_name']) ?>).</p>
+<p>Welcome, <?= e(person_name($user['title'], $user['full_name'])) ?> (<?= e($user['facility_name']) ?>).</p>
 <div class="tiles">
   <?php if ($open !== null): ?>
     <div class="tile"><div class="label">Open blood requests</div><div class="value"><?= $open ?></div></div>
