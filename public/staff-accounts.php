@@ -5,13 +5,19 @@ require_once __DIR__ . '/../includes/slip.php';
 $user = require_capability('facility_admin');   // a centre or hospital administrator
 
 $errors = [];
-$f = ['full_name' => '', 'email' => ''];
+$f = ['title' => '', 'title_other' => '', 'full_name' => '', 'email' => ''];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check();
     $action = (string)($_POST['action'] ?? '');
 
     if ($action === 'create') {
+                $f['title']       = trim((string)($_POST['title'] ?? ''));
+        $f['title_other'] = trim((string)($_POST['title_other'] ?? ''));
+        [$title, $titleError] = read_title('title');
+        if ($titleError) {
+            $errors['title'] = $titleError;
+        }
         $f['full_name'] = trim((string)($_POST['full_name'] ?? ''));
         $f['email']     = mb_strtolower(trim((string)($_POST['email'] ?? '')));
         if (mb_strlen($f['full_name']) < 2 || mb_strlen($f['full_name']) > 120) {
@@ -24,12 +30,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         if (!$errors) {
             $pw = temp_password();
-            db_transaction(function () use ($user, $f, $pw) {
+            db_transaction(function () use ($user, $f, $pw, $title) {
                 // The new account always belongs to the administrator's own facility and role.
+                
+                        $f['title']       = trim((string)($_POST['title'] ?? ''));
+        $f['title_other'] = trim((string)($_POST['title_other'] ?? ''));
+        [$title, $titleError] = read_title('title');
+        if ($titleError) {
+            $errors['title'] = $titleError;
+        }
+                
                 $id = db_val(
-                    "INSERT INTO users (full_name, email, password_hash, role, facility_id, is_facility_admin, must_change_password, created_by)
-                     VALUES (?, ?, ?, ?, ?, FALSE, TRUE, ?) RETURNING id",
-                    [$f['full_name'], $f['email'], password_hash($pw, PASSWORD_DEFAULT), $user['role'], $user['facility_id'], $user['id']]
+                                        "INSERT INTO users (title, full_name, email, password_hash, role, facility_id, is_facility_admin, must_change_password, created_by)
+                     VALUES (?, ?, ?, ?, ?, ?, FALSE, TRUE, ?) RETURNING id",
+                    [$title, $f['full_name'], $f['email'], password_hash($pw, PASSWORD_DEFAULT), $user['role'], $user['facility_id'], $user['id']]
                 );
                 db_exec("INSERT INTO audit_log (user_id, action, entity, entity_id, detail) VALUES (?, 'staff_created', 'user', ?, ?)",
                         [$user['id'], $id, $f['email']]);
@@ -39,7 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'heading' => 'Staff account credentials',
                 'rows'    => [
                     ['Facility', (string)$user['facility_name']],
-                    ['Staff member', $f['full_name']],
+                    ['Staff member', person_name($title, $f['full_name'])],
                     ['Sign-in email', $f['email'], 'mono'],
                     ['Temporary password', $pw, 'mono big'],
                     ['Sign in at', signin_url(), 'mono'],
@@ -55,7 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif (in_array($action, ['deactivate', 'activate', 'reset'], true)) {
         $target = (int)($_POST['user_id'] ?? 0);
         // Only non-admin staff of this same facility can be touched.
-        $row = db_one('SELECT id, full_name FROM users WHERE id = ? AND facility_id = ? AND is_facility_admin = FALSE',
+        $row = db_one('SELECT id, title, full_name FROM users WHERE id = ? AND facility_id = ? AND is_facility_admin = FALSE',
                       [$target, $user['facility_id']]);
         if (!$row) {
             flash_set('That account is not one of your staff.', 'error');
@@ -72,7 +86,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'heading' => 'New temporary password',
                 'rows'    => [
                     ['Facility', (string)$user['facility_name']],
-                    ['Staff member', (string)$row['full_name']],
+                    ['Staff member', person_name($row['title'], $row['full_name'])],
                     ['Sign-in email', $em, 'mono'],
                     ['Temporary password', $pw, 'mono big'],
                     ['Sign in at', signin_url(), 'mono'],
@@ -89,7 +103,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($action === 'deactivate') {
                 db_exec('DELETE FROM sessions WHERE user_id = ?', [$row['id']]);   // signs them out at once
             }
-            $msg = $row['full_name'] . ($action === 'deactivate' ? ' can no longer sign in.' : ' can sign in again.');
+            $msg = person_name($row['title'], $row['full_name']) . ($action === 'deactivate' ? ' can no longer sign in.' : ' can sign in again.');
         }
         db_exec("INSERT INTO audit_log (user_id, action, entity, entity_id, detail) VALUES (?, ?, 'user', ?, NULL)",
                 [$user['id'], 'staff_' . $action, $row['id']]);
@@ -99,7 +113,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $staff = db_all(
-    "SELECT id, full_name, email, status, last_login_at, must_change_password
+    "SELECT id, title, full_name, email, status, last_login_at, must_change_password
        FROM users WHERE facility_id = ? AND is_facility_admin = FALSE ORDER BY full_name",
     [$user['facility_id']]
 );
@@ -112,6 +126,7 @@ layout_start($user, 'Staff accounts');
 <form method="post" novalidate>
   <?= csrf_field() ?>
   <input type="hidden" name="action" value="create">
+<?php title_field('title', $f['title'], $f['title_other'], $errors); ?>
   <div class="field"><label for="full_name">Full name</label>
     <input id="full_name" name="full_name" type="text" maxlength="120" required value="<?= e($f['full_name']) ?>">
     <?php if (isset($errors['full_name'])): ?><div class="alert"><?= e($errors['full_name']) ?></div><?php endif; ?></div>
