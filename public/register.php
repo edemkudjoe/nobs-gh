@@ -9,7 +9,7 @@ if (current_user()) {
 $regions = db_all('SELECT id, name FROM regions ORDER BY name');
 $groups  = db_all('SELECT id, label FROM blood_groups ORDER BY id');
 $errors  = [];
-$f = ['full_name' => '', 'email' => '', 'date_of_birth' => '', 'weight_kg' => '', 'region_id' => '', 'blood_group_id' => '', 'phone' => ''];
+$f = ['title' => '', 'title_other' => '', 'full_name' => '', 'email' => '', 'date_of_birth' => '', 'weight_kg' => '', 'region_id' => '', 'blood_group_id' => '', 'phone' => ''];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check();
@@ -18,6 +18,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     $f['email'] = mb_strtolower($f['email']);
     $password = (string)($_POST['password'] ?? '');
+
+        [$title, $titleError] = read_title('title');
+    if ($titleError) {
+        $errors['title'] = $titleError;
+    }
 
     if (mb_strlen($f['full_name']) < 2 || mb_strlen($f['full_name']) > 120) {
         $errors['full_name'] = 'Enter your full name.';
@@ -56,10 +61,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (!$errors) {
-        db_transaction(function () use ($f, $password, $weight) {
+        db_transaction(function () use ($f, $password, $weight, $title) {
             $id = db_val(
-                "INSERT INTO users (full_name, email, password_hash, role) VALUES (?, ?, ?, 'donor') RETURNING id",
-                [$f['full_name'], $f['email'], password_hash($password, PASSWORD_DEFAULT)]
+                                "INSERT INTO users (title, full_name, email, password_hash, role) VALUES (?, ?, ?, ?, 'donor') RETURNING id",
+                [$title, $f['full_name'], $f['email'], password_hash($password, PASSWORD_DEFAULT)]
             );
             db_exec(
                 'INSERT INTO donors (user_id, blood_group_id, date_of_birth, weight_kg, region_id, phone) VALUES (?, ?, ?, ?, ?, ?)',
@@ -77,12 +82,19 @@ guest_start('Create a donor account', 'It takes about two minutes. You can check
 ?>
 <form method="post" novalidate>
   <?= csrf_field() ?>
-  <div class="frow">
+    <div class="frow">
+    <?php title_field('title', $f['title'], $f['title_other'], $errors); ?>
     <div class="field"><label for="full_name">Full name</label>
+      <span class="hint">Without your title.</span>
       <input id="full_name" name="full_name" type="text" maxlength="120" required autocomplete="name" value="<?= e($f['full_name']) ?>"><?php field_error($errors, 'full_name'); ?></div>
+  </div>
+  <div class="frow">
     <div class="field"><label for="date_of_birth">Date of birth</label>
       <span class="hint">You must be <?= setting_int('min_age') ?> to <?= setting_int('max_age') ?> to donate.</span>
       <input id="date_of_birth" name="date_of_birth" type="date" required autocomplete="bday" value="<?= e($f['date_of_birth']) ?>"><?php field_error($errors, 'date_of_birth'); ?></div>
+    <div class="field"><label for="weight_kg">Weight (kg)</label>
+      <span class="hint">Donors must weigh at least <?= setting_int('min_weight_kg') ?> kg.</span>
+      <input id="weight_kg" name="weight_kg" type="number" step="0.1" min="30" max="250" required value="<?= e($f['weight_kg']) ?>"><?php field_error($errors, 'weight_kg'); ?></div>
   </div>
   <div class="frow">
     <div class="field"><label for="email">Email address</label>
@@ -103,12 +115,7 @@ guest_start('Create a donor account', 'It takes about two minutes. You can check
         <?php foreach ($groups as $g): ?><option value="<?= (int)$g['id'] ?>"<?= (string)$g['id'] === $f['blood_group_id'] ? ' selected' : '' ?>><?= e($g['label']) ?></option><?php endforeach; ?>
       </select><?php field_error($errors, 'blood_group_id'); ?></div>
   </div>
-  <div class="frow">
-    <div class="field"><label for="weight_kg">Weight (kg)</label>
-      <span class="hint">Donors must weigh at least <?= setting_int('min_weight_kg') ?> kg.</span>
-      <input id="weight_kg" name="weight_kg" type="number" step="0.1" min="30" max="250" required value="<?= e($f['weight_kg']) ?>"><?php field_error($errors, 'weight_kg'); ?></div>
-    <div class="field" aria-hidden="true"></div>
-  </div>
+  
   <div class="frow">
     <div class="field"><label for="password">Password</label>
       <span class="hint">At least 8 characters, with a letter and a number.</span>
