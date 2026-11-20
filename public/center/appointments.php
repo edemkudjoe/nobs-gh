@@ -73,7 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     redirect('/center/appointments.php');
 }
 
-$sql = "SELECT a.id, a.status, s.slot_date, u.full_name, u.id AS donor_user, d.blood_group_id, bg.label AS blood_group
+$sql = "SELECT a.id, a.status, s.slot_date, u.title, u.full_name, u.id AS donor_user, d.blood_group_id, bg.label AS blood_group
           FROM appointments a JOIN center_slots s ON s.id = a.slot_id
           JOIN users u ON u.id = a.donor_id JOIN donors d ON d.user_id = a.donor_id
           LEFT JOIN blood_groups bg ON bg.id = d.blood_group_id
@@ -93,7 +93,7 @@ layout_start($user, 'Appointments');
   <tbody>
   <?php foreach ($due as $a): ?>
     <tr>
-      <td><?= e($a['full_name']) ?><br><span class="code">D-<?= (int)$a['donor_user'] ?></span></td>
+      <td><?= e(person_name($a['title'], $a['full_name'])) ?><br><span class="code">D-<?= (int)$a['donor_user'] ?></span></td>
       <td><?= e($a['slot_date']) ?></td>
       <td><?= $a['blood_group'] ? '<span class="code">' . e($a['blood_group']) . '</span>' : 'Not confirmed' ?></td>
       <td>
@@ -126,7 +126,7 @@ layout_start($user, 'Appointments');
   <tbody>
   <?php foreach ($upcoming as $a): ?>
     <tr><td><?= e((new DateTime($a['slot_date']))->format('D j M')) ?></td>
-        <td><?= e($a['full_name']) ?> <span class="code">D-<?= (int)$a['donor_user'] ?></span></td>
+        <td><?= e(person_name($a['title'], $a['full_name'])) ?> <span class="code">D-<?= (int)$a['donor_user'] ?></span></td>
         <td><?= $a['blood_group'] ? '<span class="code">' . e($a['blood_group']) . '</span>' : 'Not confirmed' ?></td></tr>
   <?php endforeach; ?>
   </tbody>
