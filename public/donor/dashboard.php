@@ -33,7 +33,7 @@ $booking = db_one(
 
 layout_start($user, 'Dashboard');
 ?>
-<p>Welcome, <?= e($user['full_name']) ?>.</p>
+<p>Welcome, <?= e(person_name($user['title'], $user['full_name'])) ?>.</p>
 
 <h2>Can I donate today?</h2>
 <?php if (!$donor): ?>
