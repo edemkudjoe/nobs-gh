@@ -38,7 +38,7 @@ function current_user(): ?array
         return null;
     }
     $user = db_one(
-        "SELECT u.id, u.full_name, u.email, u.role, u.facility_id, u.is_facility_admin,
+        "SELECT u.id, u.title, u.full_name, u.email, u.role, u.facility_id, u.is_facility_admin,
                 u.must_change_password,
                 f.name AS facility_name, f.type AS facility_type,
                 COALESCE(f.can_request_blood, FALSE) AS can_request_blood,
