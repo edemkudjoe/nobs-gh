@@ -14,7 +14,7 @@ $total = (int)db_val('SELECT COUNT(*) FROM audit_log WHERE (?::text = \'\' OR ac
 $pages = max(1, (int)ceil($total / $perPage));
 $page  = min($page, $pages);
 $rows  = db_all(
-    "SELECT l.id, l.created_at, l.action, l.entity, l.entity_id, l.detail, u.full_name, u.role
+    "SELECT l.id, l.created_at, l.action, l.entity, l.entity_id, l.detail, u.title, u.full_name, u.role
        FROM audit_log l LEFT JOIN users u ON u.id = l.user_id
       WHERE (?::text = '' OR l.action = ?)
       ORDER BY l.created_at DESC, l.id DESC LIMIT ?::int OFFSET ?::int",
@@ -39,7 +39,7 @@ layout_start($user, 'Audit log');
   <?php foreach ($rows as $r): ?>
     <tr>
       <td><?= e(substr($r['created_at'], 0, 19)) ?></td>
-      <td><?= $r['full_name'] ? e($r['full_name']) . '<br><span class="fine">' . e($r['role']) . '</span>' : 'Automatic' ?></td>
+      <td><?= $r['full_name'] ? e(person_name($r['title'], $r['full_name'])) . '<br><span class="fine">' . e($r['role']) . '</span>' : 'Automatic' ?></td>
       <td><span class="code"><?= e($r['action']) ?></span></td>
       <td><?= $r['entity'] ? e($r['entity']) . ($r['entity_id'] ? ' #' . (int)$r['entity_id'] : '') : '' ?></td>
       <td><?= e((string)$r['detail']) ?></td>
