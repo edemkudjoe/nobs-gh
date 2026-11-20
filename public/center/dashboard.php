@@ -30,7 +30,7 @@ $slots = db_all(
 
 layout_start($user, 'Dashboard');
 ?>
-<p>Welcome, <?= e($user['full_name']) ?> (<?= e($user['facility_name']) ?>).</p>
+<p>Welcome, <?= e(person_name($user['title'], $user['full_name'])) ?> (<?= e($user['facility_name']) ?>).</p>
 <div class="tiles">
   <div class="tile"><div class="label">Donors booked today</div><div class="value"><?= $today ?></div><div class="label"><a href="/center/appointments.php">Open appointments</a></div></div>
   <div class="tile"><div class="label">Booked from today on</div><div class="value"><?= $upcoming ?></div></div>
