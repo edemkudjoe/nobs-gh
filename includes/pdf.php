@@ -225,7 +225,7 @@ function slip_pdf(array $user, array $s): string
 
     // Footer
     $p->line($L, MiniPdf::H - 70, $R, MiniPdf::H - 70, '#dddddd');
-    $p->text($L, MiniPdf::H - 54, 'Issued ' . date('j F Y') . ' by ' . $user['full_name'] . '. Confidential.', 'F1', 8.5, '#666666');
+    $p->text($L, MiniPdf::H - 54, 'Issued ' . date('j F Y') . ' by ' . person_name($user['title'], $user['full_name']) . '. Confidential.', 'F1', 8.5, '#666666');
 
     return $p->output((string)$s['title']);
 }
