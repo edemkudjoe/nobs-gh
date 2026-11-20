@@ -20,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // New temporary password for the facility's first administrator, shown once on a printable slip.
         $fac = db_one('SELECT f.name, f.license_no, f.type, f.ownership, r.name AS region
                          FROM facilities f JOIN regions r ON r.id = f.region_id WHERE f.id = ?', [$id]);
-        $adm = db_one('SELECT id, full_name, email FROM users WHERE facility_id = ? AND is_facility_admin = TRUE ORDER BY id LIMIT 1', [$id]);
+        $adm = db_one('SELECT id, title, full_name, email FROM users WHERE facility_id = ? AND is_facility_admin = TRUE ORDER BY id LIMIT 1', [$id]);
         if (!$fac || !$adm) {
             flash_set('This facility has no administrator account.', 'error');
             redirect('/admin/facilities.php');
@@ -38,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ['Type', ($fac['type'] === 'hospital' ? 'Hospital' : 'Blood bank') . ' · ' . ($fac['ownership'] === 'private' ? 'Private' : 'Public')],
                 ['Region', (string)$fac['region']],
                 ['Registration ID', (string)$fac['license_no'], 'mono'],
-                ['Administrator', (string)$adm['full_name']],
+                ['Administrator', person_name($adm['title'], $adm['full_name'])],
                 ['Sign-in email', (string)$adm['email'], 'mono'],
                 ['Temporary password', $pw, 'mono big'],
                 ['Sign in at', signin_url(), 'mono'],
