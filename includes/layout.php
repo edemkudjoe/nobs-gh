@@ -53,6 +53,51 @@ function field_error(array $errors, string $key): void
     }
 }
 
+/** Titles in the dropdown. A title is not part of the name, so it is stored in its own column. */
+function name_titles(): array
+{
+    return ['Mr', 'Mrs', 'Miss', 'Ms', 'Mx', 'Dr', 'Prof', 'Rev', 'Hon.', 'Eng.'];
+}
+
+/** Title and name together, for example "Dr Ama Mensah". Older accounts have no title, so the name shows alone. */
+function person_name(?string $title, ?string $name): string
+{
+    return trim(trim((string)$title) . ' ' . trim((string)$name));
+}
+
+/** Reads the Title dropdown from the form, and the typed title when "Other" is chosen. Returns [title, error]. */
+function read_title(string $field = 'title'): array
+{
+    $choice = trim((string)($_POST[$field] ?? ''));
+    if ($choice === 'Other') {
+        $typed = trim((string)($_POST[$field . '_other'] ?? ''));
+        if (mb_strlen($typed) < 2 || mb_strlen($typed) > 30 || !preg_match('/^\p{L}[\p{L} .\'-]*$/u', $typed)) {
+            return [null, 'Type the title (letters only, up to 30 characters).'];
+        }
+        return [$typed, null];
+    }
+    if (!in_array($choice, name_titles(), true)) {
+        return [null, 'Choose a title.'];
+    }
+    return [$choice, null];
+}
+
+/** The Title dropdown. Choosing "Other" shows a box to type the title. */
+function title_field(string $name, string $selected, string $other, array $errors): void
+{
+    echo '<div class="field"><label for="' . e($name) . '">Title</label>';
+    echo '<select id="' . e($name) . '" name="' . e($name) . '" autocomplete="honorific-prefix" required><option value="">Choose…</option>';
+    foreach (array_merge(name_titles(), ['Other']) as $t) {
+        echo '<option value="' . e($t) . '"' . ($t === $selected ? ' selected' : '') . '>' . e($t) . '</option>';
+    }
+    echo '</select>';
+    echo '<input id="' . e($name) . '_other" name="' . e($name) . '_other" type="text" maxlength="30" aria-label="Type the title" placeholder="Type the title" value="' . e($other) . '">';
+    field_error($errors, $name);
+    echo '</div>';
+    echo '<script>(function(){var s=document.getElementById("' . e($name) . '"),o=document.getElementById("' . e($name) . '_other");'
+       . 'function u(){var on=s.value==="Other";o.style.display=on?"":"none";o.required=on;}s.addEventListener("change",u);u();})();</script>';
+}
+
 /** Remember a one-time message for the next page the user sees (after a form is saved). */
 function flash_set(string $message, string $type = 'ok'): void
 {
@@ -104,7 +149,7 @@ function layout_start(array $user, string $title): void
       <a class="brand" href="<?= e(home_for($user['role'])) ?>">National Organ &amp; Blood Bank System</a>
     </div>
     <div class="who">
-      <span><?= e($user['full_name']) ?> · <?= e($who) ?></span>
+      <span><?= e(person_name($user['title'], $user['full_name'])) ?> · <?= e($who) ?></span>
       <a class="btn btn-quiet" href="/logout.php">Sign out</a>
     </div>
   </header>
